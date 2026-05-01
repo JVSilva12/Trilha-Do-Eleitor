@@ -1,0 +1,2 @@
+trilhadoeleitor/src/assets/MorningRoutine.mp3 filter=lfs diff=lfs merge=lfs -text
+*.mp3 !text !filter !merge !diff
