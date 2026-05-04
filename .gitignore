@@ -1,0 +1,12 @@
+# Ambientes virtuais e pacotes (NUNCA enviar para o Git)
+venv/
+node_modules/
+
+# Banco de dados local (cada colega deve ter o seu próprio banco de testes)
+backend/usuarios.db
+
+# Arquivos de sistema e cache
+__pycache__/
+.DS_Store
+dist/
+.env
