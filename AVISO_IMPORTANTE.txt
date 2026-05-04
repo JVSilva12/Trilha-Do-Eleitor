@@ -1,0 +1,79 @@
+Olá, pessoal! Mateus aqui
+
+Seguinte, para garantir que vocês tenham as mesmas
+funcionalidades que eu tenho, preciso que vocês realizem
+as configurações referentes às dependências do projeto.
+
+Primeiramente, vocês devem criar um ambiente virtual do 
+python (.venv), pois usaremos o FastAPI para o backend e
+temos que garantir que, independente do sistema operacional, 
+não dê problema na hora de importar o framework
+
+Passo a passo no terminal:
+
+
+python -m venv venv (cria a pasta do ambiente virtual)
+
+
+Para atualizar o interpretador python, insira:
+
+
+source venv/bin/activate (Linux ou Mac)
+
+.\venv\Scripts\activate (Windows)
+
+
+
+Depois, instalem as dependências que baixei ao criar o setup:
+
+
+pip install -r requirements.txt
+
+
+Dessa forma, temos o que é preciso para o backend.
+Partindo para o front, tem uma pasta chamada
+"trilhadoeleitor". Dentro dela, vocês baixem o pacote de
+ambiente do Node.js, que é assim, no terminal:
+
+
+1. cd trilhadoeleitor
+
+2. npm install
+
+
+Com essas configurações feitas, vocês possuem as dependências
+instaladas. Com isso, abram dois terminais, um para o backend
+e outro para o frontend:
+
+
+cd backend 
+
+cd trilhadoeleitor
+
+
+No terminal do backend, rodem o comando: 
+uvicorn main:app --reload
+
+No terminal do frontend, rodem o comando: 
+npm run dev
+
+
+Após rodarem ambos, no terminal do frontend, acessem o link
+que é disponibilizado, onde vocês irão para a página do TDE (que,
+obviamente, não está desenvolvido ainda de forma bonitinha, mas, 
+com o tempo, aprimoramos isso).
+
+Apertem o botão "Não tem conta? Cadastre-se"
+
+Após isso, inventem um email fictício e uma senha
+
+Depois, apertem no botão verde "Cadastrar"
+
+Se aparecer mensagem de sucesso, voltem para o VScode, vejam
+se criou um 'usuarios.db' na pasta de backend. Para visualizar 
+o arquivo '.db', baixem a extensão 'SQLite Viewer' do VScode.
+
+Nesse banco de dados, vai aparecer uma coluna do email inserido e
+uma coluna do hash da senha inserida
+
+Minha intenção inicial era já fazer essa ligação entre back e front
