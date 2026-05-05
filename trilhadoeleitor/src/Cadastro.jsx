@@ -1,56 +1,100 @@
+import axios from 'axios'; 
 import { useState } from 'react';
-import axios from 'axios';
+import logo from './assets/logo.jpeg';
+import { UserIcon, MailIcon, LockIcon, GoogleIcon } from './Icons';
 
-function Cadastro() {
+export default function Cadastro({ onSwitch }) {
+  const [apelido, setApelido] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [senha, setSenha] = useState('');
   const [mensagem, setMensagem] = useState('');
 
-  const handleCadastro = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Envia os dados para a rota de cadastro do FastAPI
-      const response = await axios.post(`http://localhost:8000/cadastro?email=${email}&password=${password}`);
-      
-      setMensagem(response.data.message);
-      setEmail('');
-      setPassword('');
+        const response = await axios.post(
+            // Mudei 'senha=' para 'password=' no final da linha:
+            `http://localhost:8000/cadastro?apelido=${apelido}&email=${email}&password=${senha}`
+        );
+        alert("Cadastrado com sucesso!");
+        onSwitch();
     } catch (error) {
-      setMensagem("Erro no cadastro: " + (error.response?.data?.detail || "Erro no servidor"));
+        alert("Erro: " + (error.response?.data?.detail || "Verifique os campos"));
     }
-  };
+};
+
 
   return (
-    <div style={{ maxWidth: '300px', margin: '20px auto', textAlign: 'center', border: '1px solid #ccc', padding: '20px', borderRadius: '8px' }}>
-      <h2>Criar Conta</h2>
-      <form onSubmit={handleCadastro}>
-        <div style={{ marginBottom: '10px' }}>
-          <input
-            type="email"
-            placeholder="Escolha um e-mail"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ padding: '8px', width: '100%' }}
-          />
+    <div className="auth-page">
+      <div className="auth-banner" />
+      <main className="auth-main">
+        <div className="auth-logo">
+          <img src={logo} alt="Trilha do Eleitor" />
         </div>
-        <div style={{ marginBottom: '10px' }}>
-          <input
-            type="password"
-            placeholder="Crie uma senha"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ padding: '8px', width: '100%' }}
-          />
+        <h1 className="auth-title">Trilha do Eleitor</h1>
+        <h2 className="auth-subtitle">Crie sua conta</h2>
+        <p className="auth-desc">Preencha os dados abaixo e inicie sua jornada!</p>
+
+        <div className="auth-card">
+          <form onSubmit={handleSubmit}>
+            <div className="field">
+              <label className="field-label">Apelido</label>
+              <div className="field-input">
+                <UserIcon />
+                <input
+                  type="text"
+                  value={apelido}
+                  onChange={(e) => setApelido(e.target.value)}
+                  placeholder="Escolha um apelido"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="field">
+              <label className="field-label">E-mail</label>
+              <div className="field-input">
+                <MailIcon />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="field">
+              <label className="field-label">Senha</label>
+              <div className="field-input">
+                <LockIcon />
+                <input
+                  type="password"
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  placeholder="Digite sua senha"
+                  required
+                />
+              </div>
+            </div>
+
+            <button type="submit" className="btn-primary">Criar conta</button>
+
+            <div className="divider"><span>ou continue com</span></div>
+
+            <button type="button" className="btn-google">
+              <GoogleIcon />
+              não implementado
+            </button>
+          </form>
         </div>
-        <button type="submit" style={{ padding: '10px 20px', cursor: 'pointer', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px' }}>
-          Cadastrar
-        </button>
-      </form>
-      {mensagem && <p style={{ marginTop: '15px' }}>{mensagem}</p>}
+
+        <p className="auth-switch">
+          Já tem uma conta?{' '}
+          <button onClick={onSwitch}>Fazer Login</button>
+        </p>
+      </main>
     </div>
   );
 }
-
-export default Cadastro;
