@@ -20,13 +20,13 @@ app.add_middleware(
 password_hash = PasswordHash.recommended()
 
 @app.post("/cadastro")
-def criar_usuario(email: str, password: str, db: Session = Depends(database.get_db)):
+def criar_usuario(apelido: str, email: str, password: str, db: Session = Depends(database.get_db)):
     db_user = db.query(models.User).filter(models.User.email == email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email já cadastrado")
     
     hashed_pwd = password_hash.hash(password)
-    new_user = models.User(email=email, hashed_password=hashed_pwd)
+    new_user = models.User(apelido=apelido,email=email, hashed_password=hashed_pwd)
     db.add(new_user)
     db.commit()
     return {"message": "Usuário criado com sucesso!"}

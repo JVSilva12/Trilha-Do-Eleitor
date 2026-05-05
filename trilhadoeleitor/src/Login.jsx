@@ -1,59 +1,82 @@
 import { useState } from 'react';
-import axios from 'axios';
+import logo from './assets/logo.jpeg';
+import { MailIcon, LockIcon, GoogleIcon } from './Icons';
 
-function Login() {
+export default function Login({ onSwitch }) {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [mensagem, setMensagem] = useState('');
+  const [senha, setSenha] = useState('');
 
-  const handleLogin = async (e) => {
-    e.preventDefault(); // Impede a página de recarregar
+const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      // Faz a chamada para o backend FastAPI
-      const response = await axios.post(`http://localhost:8000/login?email=${email}&password=${password}`);
-      
-      setMensagem("Login realizado com sucesso!");
-      console.log("Token recebido:", response.data.token);
-      
-      // Aqui posso salvar o token no localStorage:
-      // localStorage.setItem('token', response.data.token);
-
+        const response = await axios.post(
+            `http://localhost:8000/login?email=${email}&password=${senha}`
+        );
+        alert("Login realizado!");
+        console.log("Token:", response.data.token);
     } catch (error) {
-      setMensagem("Erro ao fazer login: " + (error.response?.data?.detail || "Erro no servidor"));
+        alert("Erro: " + (error.response?.data?.detail || "Credenciais inválidas"));
     }
-  };
+};
+
 
   return (
-    <div style={{ maxWidth: '300px', margin: '50px auto', textAlign: 'center' }}>
-      <h2>Entrar no Trilhado Eleitor</h2>
-      <form onSubmit={handleLogin}>
-        <div style={{ marginBottom: '10px' }}>
-          <input
-            type="email"
-            placeholder="Seu e-mail"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ padding: '8px', width: '100%' }}
-          />
+    <div className="auth-page">
+      <div className="auth-banner" />
+      <main className="auth-main">
+        <div className="auth-logo">
+          <img src={logo} alt="Trilha do Eleitor" />
         </div>
-        <div style={{ marginBottom: '10px' }}>
-          <input
-            type="password"
-            placeholder="Sua senha"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ padding: '8px', width: '100%' }}
-          />
+        <h1 className="auth-title">Trilha do Eleitor</h1>
+        <h2 className="auth-subtitle">Entre na sua conta</h2>
+        <p className="auth-desc">Acesse para continuar sua jornada cidadã.</p>
+
+        <div className="auth-card">
+          <form onSubmit={handleSubmit}>
+            <div className="field">
+              <label className="field-label">E-mail</label>
+              <div className="field-input">
+                <MailIcon />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="field">
+              <label className="field-label">Senha</label>
+              <div className="field-input">
+                <LockIcon />
+                <input
+                  type="password"
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  placeholder="Digite sua senha"
+                  required
+                />
+              </div>
+            </div>
+
+            <button type="submit" className="btn-primary">Entrar</button>
+
+            <div className="divider"><span>ou continue com</span></div>
+
+            <button type="button" className="btn-google">
+              <GoogleIcon />
+              não implementado
+            </button>
+          </form>
         </div>
-        <button type="submit" style={{ padding: '10px 20px', cursor: 'pointer' }}>
-          Entrar
-        </button>
-      </form>
-      {mensagem && <p style={{ marginTop: '15px', color: 'blue' }}>{mensagem}</p>}
+
+        <p className="auth-switch">
+          Não tem uma conta?{' '}
+          <button onClick={onSwitch}>Cadastre-se</button>
+        </p>
+      </main>
     </div>
   );
 }
-
-export default Login;
