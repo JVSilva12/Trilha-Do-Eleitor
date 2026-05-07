@@ -59,21 +59,17 @@ npm run dev
 
 
 Após rodarem ambos, no terminal do frontend, acessem o link
-que é disponibilizado, onde vocês irão para a página do TDE (que,
-obviamente, não está desenvolvido ainda de forma bonitinha, mas, 
-com o tempo, aprimoramos isso).
+que é disponibilizado, onde vocês irão para a página do TDE
 
-Apertem o botão "Não tem conta? Cadastre-se"
+Após isso, inventem um apelido, um email fictício e uma senha
 
-Após isso, inventem um email fictício e uma senha
-
-Depois, apertem no botão verde "Cadastrar"
+Depois, apertem no botão roxo "Criar conta"
 
 Se aparecer mensagem de sucesso, voltem para o VScode, vejam
 se criou um 'usuarios.db' na pasta de backend. Para visualizar 
 o arquivo '.db', baixem a extensão 'SQLite Viewer' do VScode.
 
-Nesse banco de dados, vai aparecer uma coluna do email inserido e
-uma coluna do hash da senha inserida
+Nesse banco de dados, vai aparecer uma coluna do apelido inserido,
+do email inserido e uma coluna do hash da senha inserida
 
 Minha intenção inicial era já fazer essa ligação entre back e front

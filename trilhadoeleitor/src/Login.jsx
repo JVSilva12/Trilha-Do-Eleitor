@@ -1,24 +1,24 @@
+import axios from 'axios';
 import { useState } from 'react';
-import logo from './assets/logo.jpeg';
-import { MailIcon, LockIcon, GoogleIcon } from './Icons';
+import logo from './assets/TDElogo.png';
+import { MailIcon, LockIcon } from './Icons';
 
 export default function Login({ onSwitch }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-        const response = await axios.post(
-            `http://localhost:8000/login?email=${email}&password=${senha}`
-        );
-        alert("Login realizado!");
-        console.log("Token:", response.data.token);
+      const response = await axios.post(
+        `http://localhost:8000/login?email=${email}&password=${senha}`
+      );
+      alert("Login realizado!");
+      console.log("Token:", response.data.token);
     } catch (error) {
-        alert("Erro: " + (error.response?.data?.detail || "Credenciais inválidas"));
+      alert("Erro: " + (error.response?.data?.detail || "Credenciais inválidas"));
     }
-};
-
+  };
 
   return (
     <div className="auth-page">
@@ -62,13 +62,6 @@ const handleSubmit = async (e) => {
             </div>
 
             <button type="submit" className="btn-primary">Entrar</button>
-
-            <div className="divider"><span>ou continue com</span></div>
-
-            <button type="button" className="btn-google">
-              <GoogleIcon />
-              não implementado
-            </button>
           </form>
         </div>
 

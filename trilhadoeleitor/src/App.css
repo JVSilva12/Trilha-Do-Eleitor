@@ -29,7 +29,7 @@ body {
 .auth-banner {
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 176px;
+  height: 56px;
   background: var(--gradient-top);
 }
 .auth-main {
@@ -37,7 +37,7 @@ body {
   z-index: 1;
   width: 100%;
   max-width: 420px;
-  padding: 40px 24px 32px;
+  padding: 96px 24px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -97,9 +97,16 @@ body {
   text-align: left;
 }
 .field { margin-bottom: 16px; }
-.field-label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.field-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
 .field-input {
-  display: flex; align-items: center; gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -111,10 +118,17 @@ body {
   box-shadow: 0 0 0 3px rgba(109, 58, 214, 0.18);
 }
 .field-input input {
-  flex: 1; border: 0; outline: 0;
-  font-size: 14px; background: transparent;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  font-size: 14px;
+  background: transparent;
 }
-.field-hint { margin: 6px 0 0 4px; font-size: 11px; color: var(--muted); }
+.field-hint {
+  margin: 6px 0 0 4px;
+  font-size: 11px;
+  color: var(--muted);
+}
 
 .btn-primary {
   width: 100%;
@@ -129,23 +143,6 @@ body {
   box-shadow: 0 6px 16px -8px rgba(124,58,237,0.5);
 }
 .btn-primary:hover { opacity: 0.95; }
-
-.divider { display: flex; align-items: center; gap: 12px; margin: 12px 0; }
-.divider::before, .divider::after {
-  content: ''; flex: 1; height: 1px; background: var(--border);
-}
-.divider span { font-size: 12px; color: var(--muted); }
-
-.btn-google {
-  width: 100%; padding: 12px;
-  border: 1px solid var(--border);
-  background: #fff;
-  border-radius: 12px;
-  font-weight: 500; font-size: 14px;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  cursor: pointer;
-}
-.btn-google:hover { background: #f9fafb; }
 
 .auth-switch { margin-top: 24px; font-size: 14px; color: var(--muted); }
 .auth-switch button {
