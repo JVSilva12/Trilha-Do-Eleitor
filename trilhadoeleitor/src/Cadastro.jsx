@@ -1,7 +1,7 @@
-import axios from 'axios'; 
+import axios from 'axios';
 import { useState } from 'react';
-import logo from './assets/logo.jpeg';
-import { UserIcon, MailIcon, LockIcon, GoogleIcon } from './Icons';
+import logo from './assets/TDElogo.png';
+import { UserIcon, MailIcon, LockIcon } from './Icons';
 
 export default function Cadastro({ onSwitch }) {
   const [apelido, setApelido] = useState('');
@@ -9,20 +9,18 @@ export default function Cadastro({ onSwitch }) {
   const [senha, setSenha] = useState('');
   const [mensagem, setMensagem] = useState('');
 
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-        const response = await axios.post(
-            // Mudei 'senha=' para 'password=' no final da linha:
-            `http://localhost:8000/cadastro?apelido=${apelido}&email=${email}&password=${senha}`
-        );
-        alert("Cadastrado com sucesso!");
-        onSwitch();
+      const response = await axios.post(
+        `http://localhost:8000/cadastro?apelido=${apelido}&email=${email}&password=${senha}`
+      );
+      alert("Cadastrado com sucesso!");
+      onSwitch();
     } catch (error) {
-        alert("Erro: " + (error.response?.data?.detail || "Verifique os campos"));
+      alert("Erro: " + (error.response?.data?.detail || "Verifique os campos"));
     }
-};
-
+  };
 
   return (
     <div className="auth-page">
@@ -80,13 +78,6 @@ const handleSubmit = async (e) => {
             </div>
 
             <button type="submit" className="btn-primary">Criar conta</button>
-
-            <div className="divider"><span>ou continue com</span></div>
-
-            <button type="button" className="btn-google">
-              <GoogleIcon />
-              não implementado
-            </button>
           </form>
         </div>
 
