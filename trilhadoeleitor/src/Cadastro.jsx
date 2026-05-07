@@ -13,8 +13,7 @@ export default function Cadastro({ onSwitch }) {
     e.preventDefault();
     try {
       const response = await axios.post(
-        `http://localhost:8000/cadastro?apelido=${apelido}&email=${email}&password=${senha}`
-      );
+        `http://localhost:8000/cadastro?apelido=${apelido}&email=${email}&password=${senha}`);
       alert("Cadastrado com sucesso!");
       onSwitch();
     } catch (error) {

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import logo from './assets/TDElogo.png';
 import { MailIcon, LockIcon } from './Icons';
 
-export default function Login({ onSwitch }) {
+export default function Login({ onSwitch, onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
@@ -13,8 +13,12 @@ export default function Login({ onSwitch }) {
       const response = await axios.post(
         `http://localhost:8000/login?email=${email}&password=${senha}`
       );
-      alert("Login realizado!");
-      console.log("Token:", response.data.token);
+      
+      // alert("Login realizado!");
+      
+      if (onLoginSuccess) {
+        onLoginSuccess(email);
+      }
     } catch (error) {
       alert("Erro: " + (error.response?.data?.detail || "Credenciais inválidas"));
     }
