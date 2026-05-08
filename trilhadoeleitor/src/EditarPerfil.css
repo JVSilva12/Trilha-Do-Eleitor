@@ -1,10 +1,12 @@
-/* Fundo da página e gradiente no topo */
+/* Fundo da página e gradiente no topo travado na altura do monitor */
 .perfil-page {
-  min-height: 100vh;
+  height: 100vh; 
+  display: flex;
+  flex-direction: column;
   background-color: #f8f9fe;
   position: relative;
-  padding-bottom: 40px;
   font-family: 'Inter', system-ui, sans-serif;
+  overflow: hidden; /* Impede a rolagem da página inteira */
 }
 
 .perfil-page::before {
@@ -13,28 +15,29 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 200px;
+  height: 140px; /* Reduzido para ocupar menos espaço no topo */
   background: linear-gradient(135deg, #1e3a8a 0%, #6d28d9 100%);
   opacity: 0.1;
   z-index: 0;
 }
 
-/* Cabeçalho */
+/* Cabeçalho mais compacto */
 .perfil-header {
   position: relative;
   z-index: 1;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px;
+  padding: 12px 24px; /* Espaçamento vertical reduzido */
   max-width: 600px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .header-left, .header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .icon-button {
@@ -67,20 +70,20 @@
 
 .header-title {
   margin: 0;
-  font-size: 20px;
+  font-size: 18px; /* Fonte ligeiramente menor */
   font-weight: 700;
   color: #111827;
 }
 
 .header-subtitle {
-  margin: 2px 0 0;
-  font-size: 14px;
+  margin: 0;
+  font-size: 12px;
   color: #6b7280;
 }
 
 .avatar-small {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   background-color: #22c55e;
   color: white;
   border-radius: 50%;
@@ -88,43 +91,53 @@
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  font-size: 16px;
+  font-size: 14px;
 }
 
-/* Corpo Principal */
+/* Corpo Principal (Coluna que se ajusta) */
 .perfil-main {
   position: relative;
   z-index: 1;
   max-width: 600px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 20px 20px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px; /* Reduzido o espaço entre os cartões */
+  width: 100%;
+  flex: 1; /* Preenche o resto da tela */
+  
+  /* Se a tela do usuário for muito pequena, cria um scroll só aqui dentro */
+  overflow-y: auto; 
 }
 
+/* Oculta ou afina a barra de rolagem (design mais limpo) */
+.perfil-main::-webkit-scrollbar { width: 6px; }
+.perfil-main::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+
+/* Cartões mais compactos */
 .perfil-card {
   background: #ffffff;
-  border-radius: 24px;
-  padding: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  border-radius: 16px; /* Cantos um pouco menos arredondados para não gastar espaço */
+  padding: 16px; /* Padding reduzido de 24px para 16px */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
   border: 1px solid #f3f4f6;
+  flex-shrink: 0;
 }
 
 /* Cartão do Usuário */
 .user-info-card {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
+  padding: 12px 16px; /* Bem mais enxuto */
 }
 
-.avatar-large-container {
-  position: relative;
-}
+.avatar-large-container { position: relative; }
 
 .avatar-large {
-  width: 80px;
-  height: 80px;
+  width: 64px; /* Diminuído para economizar altura */
+  height: 64px;
   background-color: #22c55e;
   color: white;
   border-radius: 50%;
@@ -132,15 +145,15 @@
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  font-size: 32px;
+  font-size: 24px;
 }
 
 .edit-avatar-btn {
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 50%;
@@ -152,10 +165,7 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.edit-avatar-btn svg {
-  width: 14px;
-  height: 14px;
-}
+.edit-avatar-btn svg { width: 12px; height: 12px; }
 
 .user-details {
   display: flex;
@@ -165,23 +175,23 @@
 
 .user-name {
   margin: 0;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   color: #1f2937;
 }
 
 .user-email {
-  margin: 4px 0 8px;
-  font-size: 14px;
+  margin: 2px 0 6px;
+  font-size: 13px;
   color: #6b7280;
 }
 
 .user-badge {
   background: #eef2ff;
   color: #6366f1;
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 12px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
   font-weight: 600;
 }
 
@@ -191,32 +201,61 @@
   align-items: center;
   gap: 8px;
   color: #2563eb;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
-  margin: 0 0 20px 0;
+  margin: 0 0 12px 0; /* Margem reduzida */
 }
+.section-title svg { width: 16px; height: 16px; }
 
-.preferences-title {
-  color: #6366f1;
-}
+.preferences-title { color: #6366f1; }
 
 .form-row {
   display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 12px;
 }
 
-.flex-1 {
-  flex: 1;
+/* Sobrescrevendo os fields para serem mais estreitos e com menos margins */
+.perfil-card .field {
+  margin-bottom: 12px;
 }
+.perfil-card .field:last-child {
+  margin-bottom: 0;
+}
+
+.flex-1 { flex: 1; }
+
+.field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px; /* Mais colado no input */
+}
+
+.field-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px; /* Reduzido de 10px para 8px */
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+}
+.field-input input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  font-size: 13px;
+  background: transparent;
+}
+.field-input svg { width: 14px; height: 14px; }
 
 .optional-text {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 400;
   color: #9ca3af;
 }
 
-/* Toggle Switch (Interruptor) */
+/* Toggle Switch (Interruptor menor) */
 .preferences-row {
   display: flex;
   justify-content: space-between;
@@ -225,105 +264,82 @@
 
 .pref-title {
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: #1f2937;
 }
 
 .pref-desc {
-  margin: 4px 0 0;
-  font-size: 13px;
+  margin: 2px 0 0;
+  font-size: 12px;
   color: #6b7280;
 }
 
 .toggle-switch {
   position: relative;
   display: inline-block;
-  width: 44px;
-  height: 24px;
+  width: 40px;
+  height: 22px;
 }
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
 .slider {
   position: absolute;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   background-color: #cbd5e1;
   transition: .4s;
 }
-
 .slider:before {
   position: absolute;
   content: "";
-  height: 18px;
-  width: 18px;
+  height: 16px;
+  width: 16px;
   left: 3px;
   bottom: 3px;
   background-color: white;
   transition: .4s;
 }
-
-input:checked + .slider {
-  background-color: #6366f1;
-}
-
-input:checked + .slider:before {
-  transform: translateX(20px);
-}
-
-.slider.round {
-  border-radius: 24px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
-}
+input:checked + .slider { background-color: #6366f1; }
+input:checked + .slider:before { transform: translateX(18px); }
+.slider.round { border-radius: 24px; }
+.slider.round:before { border-radius: 50%; }
 
 /* Botões de Ação */
 .actions-row {
   display: flex;
-  gap: 16px;
-  margin-top: 8px;
+  gap: 12px;
+  margin-top: 4px; /* Margem superior reduzida */
+  margin-bottom: 8px; /* Dá espaço antes de tocar no rodapé do monitor */
 }
 
-.btn-save {
+.btn-save, .btn-cancel {
   flex: 1;
-  background: #6366f1; /* Ajustado para um roxo sólido semelhante à imagem */
-  box-shadow: none;
-}
-
-.btn-cancel {
-  flex: 1;
-  padding: 12px;
-  background: transparent;
-  border: 1px solid #6366f1;
-  color: #6366f1;
-  border-radius: 12px;
+  padding: 10px; /* Reduzimos de 12px para 10px */
+  border-radius: 10px;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
 }
-
-.btn-cancel:hover {
-  background: #eef2ff;
+.btn-save {
+  background: #6366f1;
+  border: 0;
+  color: #fff;
 }
+.btn-cancel {
+  background: transparent;
+  border: 1px solid #6366f1;
+  color: #6366f1;
+}
+.btn-cancel:hover { background: #eef2ff; }
 
-/* Responsividade para ecrãs menores */
+/* Responsividade para telemóveis */
 @media (max-width: 480px) {
   .form-row {
     flex-direction: column;
     gap: 0;
   }
-  .flex-1 {
-    margin-bottom: 16px;
+  .perfil-card .flex-1 {
+    margin-bottom: 12px;
   }
 }
