@@ -1,12 +1,12 @@
-/* Fundo da página e gradiente no topo travado na altura do monitor */
+/* Fundo da página e gradiente no topo */
 .perfil-page {
-  height: 100vh; 
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: #f8f9fe;
   position: relative;
   font-family: 'Inter', system-ui, sans-serif;
-  overflow: hidden; /* Impede a rolagem da página inteira */
+  overflow: hidden;
 }
 
 .perfil-page::before {
@@ -15,20 +15,20 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 140px; /* Reduzido para ocupar menos espaço no topo */
+  height: 140px;
   background: linear-gradient(135deg, #1e3a8a 0%, #6d28d9 100%);
   opacity: 0.1;
   z-index: 0;
 }
 
-/* Cabeçalho mais compacto */
+/* Cabeçalho */
 .perfil-header {
   position: relative;
   z-index: 1;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 24px; /* Espaçamento vertical reduzido */
+  padding: 12px 24px;
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
@@ -53,9 +53,7 @@
   transition: background 0.2s;
 }
 
-.icon-button:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
+.icon-button:hover { background: rgba(0, 0, 0, 0.05); }
 
 .bell-button {
   background: #ffffff;
@@ -63,28 +61,14 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 
-.header-titles {
-  display: flex;
-  flex-direction: column;
-}
-
-.header-title {
-  margin: 0;
-  font-size: 18px; /* Fonte ligeiramente menor */
-  font-weight: 700;
-  color: #111827;
-}
-
-.header-subtitle {
-  margin: 0;
-  font-size: 12px;
-  color: #6b7280;
-}
+.header-titles { display: flex; flex-direction: column; }
+.header-title { margin: 0; font-size: 18px; font-weight: 700; color: #111827; }
+.header-subtitle { margin: 0; font-size: 12px; color: #6b7280; }
 
 .avatar-small {
   width: 36px;
   height: 36px;
-  background-color: #22c55e;
+  background-color: #6d28d9;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -92,9 +76,12 @@
   justify-content: center;
   font-weight: bold;
   font-size: 14px;
+  overflow: hidden;
 }
 
-/* Corpo Principal (Coluna que se ajusta) */
+.avatar-small img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Corpo Principal */
 .perfil-main {
   position: relative;
   z-index: 1;
@@ -103,42 +90,39 @@
   padding: 0 20px 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px; /* Reduzido o espaço entre os cartões */
+  gap: 12px;
   width: 100%;
-  flex: 1; /* Preenche o resto da tela */
-  
-  /* Se a tela do usuário for muito pequena, cria um scroll só aqui dentro */
-  overflow-y: auto; 
+  flex: 1;
+  overflow-y: auto;
 }
 
-/* Oculta ou afina a barra de rolagem (design mais limpo) */
 .perfil-main::-webkit-scrollbar { width: 6px; }
 .perfil-main::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
 
-/* Cartões mais compactos */
+/* Cartões */
 .perfil-card {
   background: #ffffff;
-  border-radius: 16px; /* Cantos um pouco menos arredondados para não gastar espaço */
-  padding: 16px; /* Padding reduzido de 24px para 16px */
+  border-radius: 16px;
+  padding: 16px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
   border: 1px solid #f3f4f6;
   flex-shrink: 0;
 }
 
-/* Cartão do Usuário */
 .user-info-card {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 12px 16px; /* Bem mais enxuto */
+  padding: 12px 16px;
 }
 
+/* Container de Foto de Perfil */
 .avatar-large-container { position: relative; }
 
 .avatar-large {
-  width: 64px; /* Diminuído para economizar altura */
+  width: 64px;
   height: 64px;
-  background-color: #22c55e;
+  background-color: #6d28d9;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -146,100 +130,89 @@
   justify-content: center;
   font-weight: bold;
   font-size: 24px;
+  overflow: hidden;
 }
 
-.edit-avatar-btn {
+.avatar-large img { width: 100%; height: 100%; object-fit: cover; }
+
+.avatar-btns-group {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 24px;
-  height: 24px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  bottom: -4px;
+  right: -8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edit-avatar-btn, .remove-avatar-btn {
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 1px solid #e5e7eb;
+  transition: transform 0.2s;
 }
 
-.edit-avatar-btn svg { width: 12px; height: 12px; }
+.edit-avatar-btn:hover, .remove-avatar-btn:hover { transform: scale(1.1); }
 
-.user-details {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
+.edit-avatar-btn { background: #ffffff; color: #6b7280; }
+.remove-avatar-btn { background: #fee2e2; color: #ef4444; border-color: #fecaca; }
 
-.user-name {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  color: #1f2937;
-}
+.edit-avatar-btn svg, .remove-avatar-btn svg { width: 12px; height: 12px; }
 
-.user-email {
-  margin: 2px 0 6px;
-  font-size: 13px;
-  color: #6b7280;
-}
+/* Detalhes do Usuário */
+.user-details { display: flex; flex-direction: column; align-items: flex-start; }
+.user-name { margin: 0; font-size: 18px; font-weight: 700; color: #1f2937; }
+.user-email { margin: 2px 0 6px; font-size: 13px; color: #6b7280; }
 
 .user-badge {
-  background: #eef2ff;
-  color: #6366f1;
-  padding: 2px 10px;
-  border-radius: 12px;
+  background: #f0fdf4;
+  color: #16a34a;
+  padding: 4px 12px;
+  border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
+  border: 1px solid #dcfce7;
+  margin-top: 4px;
 }
 
-/* Secções de Formulário */
+/* Formulários */
 .section-title {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #2563eb;
+  color: #6d28d9;
   font-size: 14px;
   font-weight: 700;
-  margin: 0 0 12px 0; /* Margem reduzida */
-}
-.section-title svg { width: 16px; height: 16px; }
-
-.preferences-title { color: #6366f1; }
-
-.form-row {
-  display: flex;
-  gap: 12px;
-}
-
-/* Sobrescrevendo os fields para serem mais estreitos e com menos margins */
-.perfil-card .field {
   margin-bottom: 12px;
 }
-.perfil-card .field:last-child {
-  margin-bottom: 0;
-}
 
+.section-title svg { width: 16px; height: 16px; }
+.form-row { display: flex; gap: 12px; }
+.perfil-card .field { margin-bottom: 12px; }
 .flex-1 { flex: 1; }
 
 .field-label {
   display: block;
   font-size: 13px;
   font-weight: 600;
-  margin-bottom: 4px; /* Mais colado no input */
+  margin-bottom: 4px;
 }
 
 .field-input {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px; /* Reduzido de 10px para 8px */
+  padding: 8px 12px;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   background: #fff;
 }
+
 .field-input input {
   flex: 1;
   border: 0;
@@ -247,99 +220,31 @@
   font-size: 13px;
   background: transparent;
 }
+
 .field-input svg { width: 14px; height: 14px; }
+.optional-text { font-size: 11px; font-weight: 400; color: #9ca3af; }
 
-.optional-text {
-  font-size: 11px;
-  font-weight: 400;
-  color: #9ca3af;
-}
+/* Toggle */
+.preferences-row { display: flex; justify-content: space-between; align-items: center; }
+.pref-title { margin: 0; font-size: 14px; font-weight: 700; color: #1f2937; }
+.pref-desc { margin: 2px 0 0; font-size: 12px; color: #6b7280; }
 
-/* Toggle Switch (Interruptor menor) */
-.preferences-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.pref-title {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-.pref-desc {
-  margin: 2px 0 0;
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 40px;
-  height: 22px;
-}
+.toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; }
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #cbd5e1;
-  transition: .4s;
-}
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .4s;
-}
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 24px; }
+.slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
 input:checked + .slider { background-color: #6366f1; }
 input:checked + .slider:before { transform: translateX(18px); }
-.slider.round { border-radius: 24px; }
-.slider.round:before { border-radius: 50%; }
 
 /* Botões de Ação */
-.actions-row {
-  display: flex;
-  gap: 12px;
-  margin-top: 4px; /* Margem superior reduzida */
-  margin-bottom: 8px; /* Dá espaço antes de tocar no rodapé do monitor */
-}
-
-.btn-save, .btn-cancel {
-  flex: 1;
-  padding: 10px; /* Reduzimos de 12px para 10px */
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.btn-save {
-  background: #6366f1;
-  border: 0;
-  color: #fff;
-}
-.btn-cancel {
-  background: transparent;
-  border: 1px solid #6366f1;
-  color: #6366f1;
-}
+.actions-row { display: flex; gap: 12px; margin-top: 4px; margin-bottom: 8px; }
+.btn-save, .btn-cancel { flex: 1; padding: 10px; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+.btn-save { background: #6366f1; border: 0; color: #fff; }
+.btn-cancel { background: transparent; border: 1px solid #6366f1; color: #6366f1; }
 .btn-cancel:hover { background: #eef2ff; }
 
-/* Responsividade para telemóveis */
+/* Responsividade Mobile */
 @media (max-width: 480px) {
-  .form-row {
-    flex-direction: column;
-    gap: 0;
-  }
-  .perfil-card .flex-1 {
-    margin-bottom: 12px;
-  }
+  .form-row { flex-direction: column; gap: 0; }
+  .perfil-card .flex-1 { margin-bottom: 12px; }
 }

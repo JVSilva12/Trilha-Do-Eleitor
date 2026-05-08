@@ -1,8 +1,6 @@
-<div style="text-align: center; padding: 20px;">
-  <p style="font-size: 24px; font-family: 'Trebuchet MS', sans-serif; font-weight: bold; letter-spacing: 1px; color: #694ec19b;">
-    TRILHA DO ELEITOR
-  </p>
-</div>
+<p align="center">
+  <b> TRILHA DO ELEITOR </b>
+</p>
 
 <p align="center">
   <img src="./trilhadoeleitor/public/favicon.png" alt="Logo Trilha do Eleitor" width="180"/>

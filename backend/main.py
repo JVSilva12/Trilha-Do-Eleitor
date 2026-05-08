@@ -52,7 +52,7 @@ def criar_usuario(apelido: str, email: str, password: str, db: Session = Depends
         raise HTTPException(status_code=400, detail="Email já cadastrado")
     
     hashed_pwd = password_hash.hash(password)
-    new_user = models.User(apelido=apelido, nome_completo=apelido, email=email, hashed_password=hashed_pwd)
+    new_user = models.User(apelido=apelido, email=email, hashed_password=hashed_pwd)
     db.add(new_user)
     db.commit()
     return {"message": "Usuário criado com sucesso!"}
@@ -69,13 +69,28 @@ def buscar_perfil(email: str, db: Session = Depends(database.get_db)):
     user = db.query(models.User).filter(models.User.email == email).first()
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    
+    data_obj = getattr(user, 'data_criacao', None)
+    data_formatada = data_obj.strftime("%d/%m/%Y") if data_obj else "--/--/----"
+    
     return {
         "apelido": user.apelido,
         "email": user.email,
         "telefone": user.telefone,
-        "nome_completo": user.nome_completo,
-        "foto_perfil": user.foto_perfil
+        "foto_perfil": user.foto_perfil,
+        "data_criacao": data_formatada
     }
+
+
+
+@app.delete("/perfil/{email}/foto")
+def remover_foto(email: str, db: Session = Depends(database.get_db)):
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    user.foto_perfil = None
+    db.commit()
+    return {"message": "Foto removida com sucesso"}
 
 @app.put("/perfil/atualizar/{email_atual}")
 def atualizar_perfil(email_atual: str, dados: UserUpdate, db: Session = Depends(database.get_db)):
@@ -83,12 +98,16 @@ def atualizar_perfil(email_atual: str, dados: UserUpdate, db: Session = Depends(
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     
-    user.apelido = dados.apelido
+    if not dados.apelido or not dados.apelido.strip():
+        raise HTTPException(status_code=400, detail="O apelido é obrigatório e não pode ser vazio.")
+    
+    user.apelido = dados.apelido.strip()
     user.telefone = dados.telefone
     
-    if dados.nova_senha and dados.senha_atual:
-        if not password_hash.verify(dados.senha_atual, user.hashed_password):
-            raise HTTPException(status_code=400, detail="Senha atual incorreta")
+    if dados.nova_senha:
+        if not dados.senha_atual or not password_hash.verify(dados.senha_atual, user.hashed_password):
+            raise HTTPException(status_code=400, detail="Senha atual incorreta ou não informada")
+        
         validar_complexidade_senha(dados.nova_senha)
         user.hashed_password = password_hash.hash(dados.nova_senha)
     
