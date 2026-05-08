@@ -9,11 +9,26 @@ export default function Cadastro({ onSwitch }) {
   const [senha, setSenha] = useState('');
   const [mensagem, setMensagem] = useState('');
 
+  const validarSenha = (s) => {
+    const temMaiuscula = /[A-Z]/.test(s);
+    const temMinuscula = /[a-z]/.test(s);
+    const temNumero = /\d/.test(s);
+    const temOitoChars = s.length >= 8;
+    return temMaiuscula && temMinuscula && temNumero && temOitoChars;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validarSenha(senha)) {
+      alert("Sua senha deve ter no mínimo 8 caracteres, incluindo uma letra maiúscula, uma minúscula e um número.");
+      return;
+    }
+
     try {
       const response = await axios.post(
-        `http://localhost:8000/cadastro?apelido=${apelido}&email=${email}&password=${senha}`);
+        `http://localhost:8000/cadastro?apelido=${apelido}&email=${email}&password=${senha}`
+      );
       alert("Cadastrado com sucesso!");
       onSwitch();
     } catch (error) {
@@ -31,19 +46,19 @@ export default function Cadastro({ onSwitch }) {
         <h1 className="auth-title">Trilha do Eleitor</h1>
         <h2 className="auth-subtitle">Crie sua conta</h2>
         <p className="auth-desc">Preencha os dados abaixo e inicie sua jornada!</p>
-
+        
         <div className="auth-card">
           <form onSubmit={handleSubmit}>
             <div className="field">
               <label className="field-label">Apelido</label>
               <div className="field-input">
                 <UserIcon />
-                <input
-                  type="text"
+                <input 
+                  type="text" 
                   value={apelido}
                   onChange={(e) => setApelido(e.target.value)}
                   placeholder="Escolha um apelido"
-                  required
+                  required 
                 />
               </div>
             </div>
@@ -52,12 +67,12 @@ export default function Cadastro({ onSwitch }) {
               <label className="field-label">E-mail</label>
               <div className="field-input">
                 <MailIcon />
-                <input
-                  type="email"
+                <input 
+                  type="email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu@email.com"
-                  required
+                  required 
                 />
               </div>
             </div>
@@ -66,12 +81,12 @@ export default function Cadastro({ onSwitch }) {
               <label className="field-label">Senha</label>
               <div className="field-input">
                 <LockIcon />
-                <input
-                  type="password"
+                <input 
+                  type="password" 
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
-                  placeholder="Digite sua senha"
-                  required
+                  placeholder="Mínimo 8 caracteres (A, a, 0-9)"
+                  required 
                 />
               </div>
             </div>
