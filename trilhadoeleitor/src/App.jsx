@@ -1,34 +1,59 @@
 import { useState } from 'react';
+import './App.css';
 import Login from './Login';
 import Cadastro from './Cadastro';
+import Trilhas from './Trilhas';
 import EditarPerfil from './EditarPerfil';
-import './App.css';
 
-export default function App() {
-  const [mode, setMode] = useState('signup');
-  const [userEmail, setUserEmail] = useState(''); 
+function App() {
+  const [tela, setTela] = useState('login');
+  const [emailLogado, setEmailLogado] = useState('');
 
-  const navegarPara = (novoModo) => setMode(novoModo);
+  const handleLoginSucesso = (email) => {
+    setEmailLogado(email);
+    setTela('home');
+  };
 
-  if (mode === 'signup') {
-    return <Cadastro onSwitch={() => navegarPara('login')} />;
-  }
+  const handleLogout = () => {
+    setEmailLogado('');
+    setTela('login');
+  };
 
-  if (mode === 'login') {
-    return (
-      <Login 
-        onSwitch={() => navegarPara('signup')} 
-        onLoginSuccess={(email) => {
-          setUserEmail(email); 
-          navegarPara('edit_profile');
-        }} 
-      />
-    );
-  }
+  return (
+    <div className="App">
+      {/* Fluxo de Login */}
+      {tela === 'login' && (
+        <Login 
+          onLoginSucesso={handleLoginSucesso} 
+          onSwitch={() => setTela('cadastro')} 
+        />
+      )}
+      
+      {/* Fluxo de Cadastro */}
+      {tela === 'cadastro' && (
+        <Cadastro 
+          onSwitch={() => setTela('login')} 
+        />
+      )}
 
-  if (mode === 'edit_profile') {
-    return <EditarPerfil emailUsuario={userEmail} onVoltar={() => navegarPara('login')} />;
-  }
+      {/* Home Page - Exibe as Trilhas e o cabeçalho com foto */}
+      {tela === 'home' && (
+        <Trilhas 
+          emailUsuario={emailLogado} 
+          onLogout={handleLogout} 
+          onIrParaPerfil={() => setTela('perfil')} 
+        />
+      )}
 
-  return null;
+      {/* Página de Edição de Perfil */}
+      {tela === 'perfil' && (
+        <EditarPerfil 
+          emailUsuario={emailLogado} 
+          onVoltar={() => setTela('home')} 
+        />
+      )}
+    </div>
+  );
 }
+
+export default App;

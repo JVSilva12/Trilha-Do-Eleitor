@@ -127,3 +127,25 @@ def upload_foto(email: str, file: UploadFile = File(...), db: Session = Depends(
     user.foto_perfil = f"/{file_location}"
     db.commit()
     return {"foto_url": user.foto_perfil}
+
+@app.get("/inscricoes/{email}")
+def listar_inscricoes(email: str, db: Session = Depends(database.get_db)):
+    # Retorna apenas os IDs das trilhas que o usuário já se inscreveu
+    inscricoes = db.query(models.Inscricao).filter(models.Inscricao.user_email == email).all()
+    return [i.trilha_id for i in inscricoes]
+
+@app.post("/inscrever")
+def inscrever_trilha(email: str, trilha_id: str, db: Session = Depends(database.get_db)):
+    # Verifica se já existe a inscrição
+    existe = db.query(models.Inscricao).filter(
+        models.Inscricao.user_email == email, 
+        models.Inscricao.trilha_id == trilha_id
+    ).first()
+    
+    if existe:
+        raise HTTPException(status_code=400, detail="Você já está inscrito nesta trilha.")
+    
+    nova_inscricao = models.Inscricao(user_email=email, trilha_id=trilha_id)
+    db.add(nova_inscricao)
+    db.commit()
+    return {"message": "Inscrição realizada com sucesso!"}
