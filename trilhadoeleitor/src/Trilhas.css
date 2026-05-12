@@ -227,3 +227,27 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+.trilha-card-banner {
+  width: 100%;
+  height: 160px; /* Altura ideal para o banner do card */
+  overflow: hidden;
+}
+
+.trilha-banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Faz a foto preencher o espaço sem distorcer */
+  display: block;
+}
+
+.trilha-banner-fallback {
+  width: 100%;
+  height: 100%;
+}
+
+/* Efeito de hover para dar um toque profissional */
+.trilha-card:hover .trilha-banner-img {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
