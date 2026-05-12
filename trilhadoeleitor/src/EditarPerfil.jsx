@@ -5,7 +5,6 @@ import {
  MailIcon, 
  LockIcon, 
  ArrowLeftIcon, 
- BellIcon, 
  PhoneIcon, 
  PencilIcon,
  TrashIcon 
@@ -56,7 +55,7 @@ export default function EditarPerfil({ emailUsuario, onVoltar }) {
 
  const handleSalvar = async () => {
    if (!apelido || apelido.trim() === '') {
-     alert("O campo 'Apelido' é obrigatório e não pode ficar vazio.");
+     alert("O campo 'Apelido' é obrigatório.");
      return;
    }
 
@@ -136,14 +135,14 @@ export default function EditarPerfil({ emailUsuario, onVoltar }) {
   <div className="perfil-page">
     <header className="perfil-header">
       <div className="header-left">
-        <button className="icon-button" onClick={onVoltar}><ArrowLeftIcon /></button>
+        <button className="icon-button" onClick={onVoltar} title="Voltar"><ArrowLeftIcon /></button>
         <div className="header-titles">
           <h1 className="header-title">Editar Perfil</h1>
           <p className="header-subtitle">Atualize suas informações</p>
         </div>
       </div>
       <div className="header-right">
-        <button className="icon-button bell-button"><BellIcon /></button>
+        {/* SINO REMOVIDO DAQUI */}
         <div className="avatar-small">
           {fotoPerfil ? <img src={fotoPerfil} alt="Perfil" /> : gerarIniciais(nomeExibicao)}
         </div>
@@ -176,12 +175,7 @@ export default function EditarPerfil({ emailUsuario, onVoltar }) {
             <label className="field-label">Apelido</label>
             <div className="field-input">
               <UserIcon />
-              <input 
-                type="text" 
-                value={apelido} 
-                onChange={(e) => setApelido(e.target.value)} 
-                placeholder="Seu apelido"
-              />
+              <input type="text" value={apelido} onChange={(e) => setApelido(e.target.value)} />
             </div>
           </div>
           <div className="field flex-1">
