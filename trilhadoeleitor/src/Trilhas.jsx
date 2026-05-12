@@ -1,12 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import logo from './assets/TDElogo.png';
+import fotoUrna from './assets/urna.png';
+import fotoProcesso from './assets/processo.png';
+import fotoFakeNews from './assets/fakenews.png'; 
 import './Trilhas.css';
 
 const trilhasDados = [
-  { id: 'urna', titulo: 'Urna Eletrônica', descricao: 'Aprenda a utilizar a urna eletrônica de forma simples e prática.', cor: 'linear-gradient(135deg, #1e3a8a, #312e81)' },
-  { id: 'processo', titulo: 'Processo Eleitoral', descricao: 'Aprenda como funciona o processo eleitoral no Brasil.', cor: 'linear-gradient(135deg, #0f172a, #1e293b)' },
-  { id: 'fakenews', titulo: 'Combate às Fake News', descricao: 'Aprenda a identificar e a combater notícias falsas.', cor: 'linear-gradient(135deg, #4c1d95, #6d28d9)' },
+  { 
+    id: 'urna', 
+    titulo: 'Urna Eletrônica', 
+    imagem: fotoUrna, 
+    descricao: 'Aprenda a utilizar a urna eletrônica de forma simples e prática.', 
+    cor: 'linear-gradient(135deg, #1e3a8a, #312e81)' 
+  },
+  { 
+    id: 'processo', 
+    titulo: 'Processo Eleitoral', 
+    imagem: fotoProcesso,
+    descricao: 'Aprenda como funciona o processo eleitoral em território brasileiro.', 
+    cor: 'linear-gradient(135deg, #0f172a, #1e293b)' 
+  },
+  { 
+    id: 'fakenews', 
+    titulo: 'Combate às Fake News', 
+    imagem: fotoFakeNews, 
+    descricao: 'Aprenda a identificar notícias falsas e saiba como combatê-las.', 
+    cor: 'linear-gradient(135deg, #4c1d95, #6d28d9)' 
+  },
 ];
 
 export default function Trilhas({ emailUsuario, onLogout, onIrParaPerfil }) {
@@ -69,7 +90,15 @@ export default function Trilhas({ emailUsuario, onLogout, onIrParaPerfil }) {
             const estaInscrito = inscricoes.includes(trilha.id);
             return (
               <div key={trilha.id} className="trilha-card">
-                <div className="trilha-header" style={{ background: trilha.cor }} />
+                {/* Cabeçalho do Card com Imagem ou Gradiente */}
+                <div className="trilha-card-banner">
+                  {trilha.imagem ? (
+                    <img src={trilha.imagem} alt={trilha.titulo} className="trilha-banner-img" />
+                  ) : (
+                    <div className="trilha-banner-fallback" style={{ background: trilha.cor }} />
+                  )}
+                </div>
+
                 <div className="trilha-content">
                   <h3>{trilha.titulo}</h3>
                   <p>{trilha.descricao}</p>
