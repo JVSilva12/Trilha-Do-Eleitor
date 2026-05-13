@@ -1,23 +1,33 @@
-import axios from 'axios';
 import { useState } from 'react';
 import logo from './assets/TDElogo.png';
 import { UserIcon, MailIcon, LockIcon } from './Icons';
+import api from './api';
 
 export default function Cadastro({ onSwitch }) {
   const [apelido, setApelido] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const [mensagem, setMensagem] = useState('');
+  const [tipoUsuario, setTipoUsuario] = useState('conteudista');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        `http://localhost:8000/cadastro?apelido=${apelido}&email=${email}&password=${senha}`);
+      await api.post('/cadastro', null, {
+        params: {
+          apelido,
+          email,
+          password: senha,
+          tipo_usuario: tipoUsuario,
+        },
+      });
       alert("Cadastrado com sucesso!");
       onSwitch();
     } catch (error) {
-      alert("Erro: " + (error.response?.data?.detail || "Verifique os campos"));
+      const detalhe = error.response?.data?.detail;
+      const mensagem = Array.isArray(detalhe)
+        ? detalhe.map((item) => item.msg || 'Campo inválido').join(' | ')
+        : detalhe || error.message || 'Verifique os campos';
+      alert(`Erro: ${mensagem}`);
     }
   };
 
@@ -59,6 +69,17 @@ export default function Cadastro({ onSwitch }) {
                   placeholder="seu@email.com"
                   required
                 />
+              </div>
+            </div>
+
+            <div className="field">
+              <label className="field-label">Tipo de usuário</label>
+              <div className="field-input">
+                <UserIcon />
+                <select value={tipoUsuario} onChange={(e) => setTipoUsuario(e.target.value)}>
+                  <option value="conteudista">Conteudista</option>
+                  <option value="aluno">Usuario Comum</option>
+                </select>
               </div>
             </div>
 

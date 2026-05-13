@@ -117,12 +117,15 @@ body {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(109, 58, 214, 0.18);
 }
-.field-input input {
+.field-input input,
+.field-input select {
   flex: 1;
   border: 0;
   outline: 0;
   font-size: 14px;
   background: transparent;
+  color: var(--foreground);
+  font-family: inherit;
 }
 .field-hint {
   margin: 6px 0 0 4px;

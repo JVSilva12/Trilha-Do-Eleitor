@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="540" height="300" viewBox="0 0 540 300" fill="none">
+  <defs>
+    <linearGradient id="g6" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3847D9"/>
+      <stop offset="1" stop-color="#2D50FA"/>
+    </linearGradient>
+  </defs>
+  <rect width="540" height="300" rx="24" fill="url(#g6)"/>
+  <text x="34" y="106" fill="#E5EDFF" font-size="52" font-family="Inter, Arial" font-weight="800">JOVEM ELEITOR</text>
+  <text x="34" y="166" fill="#C9D6FF" font-size="42" font-family="Inter, Arial" font-weight="700">SEU VOTO, SEU FUTURO</text>
+</svg>

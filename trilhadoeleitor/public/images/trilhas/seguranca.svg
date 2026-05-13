@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="540" height="300" viewBox="0 0 540 300" fill="none">
+  <defs>
+    <linearGradient id="g4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111532"/>
+      <stop offset="1" stop-color="#1D1D36"/>
+    </linearGradient>
+  </defs>
+  <rect width="540" height="300" rx="24" fill="url(#g4)"/>
+  <text x="34" y="90" fill="#EEF2FF" font-size="44" font-family="Inter, Arial" font-weight="700">SEGURANÇA</text>
+  <text x="34" y="138" fill="#EEF2FF" font-size="44" font-family="Inter, Arial" font-weight="700">DA INFORMAÇÃO</text>
+  <text x="34" y="190" fill="#E78A20" font-size="40" font-family="Inter, Arial" font-weight="700">NA ERA DIGITAL</text>
+  <path d="M465 244c-20-10-34-28-34-49v-24l34-14 34 14v24c0 21-14 39-34 49z" stroke="#F59E0B" stroke-width="8" fill="none"/>
+  <path d="M451 205l11 11 19-22" stroke="#F59E0B" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

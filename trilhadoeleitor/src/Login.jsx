@@ -1,7 +1,7 @@
-import axios from 'axios';
 import { useState } from 'react';
 import logo from './assets/TDElogo.png';
 import { MailIcon, LockIcon } from './Icons';
+import api from './api';
 
 export default function Login({ onSwitch, onLoginSuccess }) {
   const [email, setEmail] = useState('');
@@ -10,14 +10,15 @@ export default function Login({ onSwitch, onLoginSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        `http://localhost:8000/login?email=${email}&password=${senha}`
-      );
-      
-      // alert("Login realizado!");
-      
+      const response = await api.post('/login', null, {
+        params: {
+          email,
+          password: senha,
+        },
+      });
+
       if (onLoginSuccess) {
-        onLoginSuccess(email);
+        onLoginSuccess(response.data);
       }
     } catch (error) {
       alert("Erro: " + (error.response?.data?.detail || "Credenciais inválidas"));

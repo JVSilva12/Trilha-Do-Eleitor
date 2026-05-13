@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="540" height="300" viewBox="0 0 540 300" fill="none">
+  <defs>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0E3A61"/>
+      <stop offset="1" stop-color="#16355A"/>
+    </linearGradient>
+  </defs>
+  <rect width="540" height="300" rx="24" fill="url(#g2)"/>
+  <text x="36" y="84" fill="#D6F0FF" font-size="40" font-family="Inter, Arial" font-weight="700">COMO FUNCIONAM</text>
+  <text x="36" y="128" fill="#D6F0FF" font-size="40" font-family="Inter, Arial" font-weight="700">AS ELEIÇÕES</text>
+  <text x="36" y="225" fill="#F9C843" font-size="98" font-family="Inter, Arial" font-weight="800">2026</text>
+  <text x="40" y="260" fill="#8BA9C8" font-size="18" font-family="Inter, Arial">Entenda o processo de forma fácil</text>
+</svg>
