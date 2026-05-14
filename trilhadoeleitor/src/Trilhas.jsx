@@ -7,9 +7,9 @@ import fotoFakeNews from './assets/fakenews.png';
 import './Trilhas.css';
 
 const trilhasDados = [
-  { id: 'urna', titulo: 'Urna Eletrônica', imagem: fotoUrna, descricao: 'Aprenda a utilizar a urna eletrônica de forma simples e segura.', cor: 'linear-gradient(135deg, #1e3a8a, #312e81)' },
-  { id: 'processo', titulo: 'Processo Eleitoral', imagem: fotoProcesso, descricao: 'Conheça todo o processo eleitoral no Brasil.', cor: 'linear-gradient(135deg, #0f172a, #1e293b)' },
-  { id: 'fakenews', titulo: 'Combate às Fake News', imagem: fotoFakeNews, descricao: 'Saiba como identificar e combater notícias falsas.', cor: 'linear-gradient(135deg, #4c1d95, #6d28d9)' },
+  { id: 'urna', titulo: 'Urna Eletrônica', imagem: fotoUrna, descricao: 'Aprenda a utilizar a urna eletrônica de forma simples e prática.', cor: 'linear-gradient(135deg, #1e3a8a, #312e81)' },
+  { id: 'processo', titulo: 'Processo Eleitoral', imagem: fotoProcesso, descricao: 'Aprenda como funciona o processo eleitoral em território brasileiro.', cor: 'linear-gradient(135deg, #0f172a, #1e293b)' },
+  { id: 'fakenews', titulo: 'Combate às Fake News', imagem: fotoFakeNews, descricao: 'Aprenda a identicar notícias falsas e saiba como combatê-las.', cor: 'linear-gradient(135deg, #4c1d95, #6d28d9)' },
 ];
 
 const API_URL = "http://127.0.0.1:8000";

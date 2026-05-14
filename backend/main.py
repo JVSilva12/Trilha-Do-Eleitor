@@ -66,7 +66,7 @@ def enviar_email_real(nome_usuario: str, email_usuario: str):
         mensagem = MIMEMultipart()
         mensagem["From"] = EMAIL_ADM
         mensagem["To"] = EMAIL_ADM
-        mensagem["Subject"] = f"🚀 Nova Solicitação de Conteudista: {nome_usuario}"
+        mensagem["Subject"] = f"Nova Solicitação de Conteudista: {nome_usuario}"
 
         # INCLUSÃO CRUCIAL DA PORTA :8000 NO LINK DO E-MAIL
         base_url = "http://localhost:8000/admin/aprovar"
@@ -76,7 +76,7 @@ def enviar_email_real(nome_usuario: str, email_usuario: str):
         <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
                 <h2 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">Solicitação de Upgrade de Conta</h2>
-                <p>O seguinte usuário solicitou permissões de <strong>Conteudista</strong> na plataforma Trilhas do Eleitor:</p>
+                <p>O seguinte usuário solicitou permissões de <strong>Conteudista</strong> na plataforma Trilha do Eleitor:</p>
                 <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 15px 0;">
                     <p style="margin: 5px 0;"><strong>Apelido:</strong> {nome_usuario}</p>
                     <p style="margin: 5px 0;"><strong>E-mail:</strong> {email_usuario}</p>
@@ -86,7 +86,7 @@ def enviar_email_real(nome_usuario: str, email_usuario: str):
                     <a href="{link_aprovacao}" style="display: inline-block; padding: 12px 30px; background-color: #22c55e; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.2);">Aprovar Novo Conteudista</a>
                 </p>
                 <hr style="border: 0; border-top: 1px solid #eee; margin-top: 30px;">
-                <p style="font-size: 11px; color: #777; text-align: center;">Este é um e-mail automatizado gerado pelo sistema Trilhas do Eleitor.</p>
+                <p style="font-size: 11px; color: #777; text-align: center;">Este é um e-mail automatizado gerado pelo sistema Trilha do Eleitor.</p>
             </body>
         </html>
         """
