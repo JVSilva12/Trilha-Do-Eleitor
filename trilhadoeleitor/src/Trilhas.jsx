@@ -1,60 +1,78 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import logo from './assets/TDElogo.png';
-import fotoUrna from './assets/urna.png';
-import fotoProcesso from './assets/processo.png';
+import fotoUrna from './assets/urna.png'; 
+import fotoProcesso from './assets/processo.png'; 
 import fotoFakeNews from './assets/fakenews.png'; 
 import './Trilhas.css';
 
 const trilhasDados = [
-  { 
-    id: 'urna', 
-    titulo: 'Urna Eletrônica', 
-    imagem: fotoUrna, 
-    descricao: 'Aprenda a utilizar a urna eletrônica de forma simples e prática.', 
-    cor: 'linear-gradient(135deg, #1e3a8a, #312e81)' 
-  },
-  { 
-    id: 'processo', 
-    titulo: 'Processo Eleitoral', 
-    imagem: fotoProcesso,
-    descricao: 'Aprenda como funciona o processo eleitoral em território brasileiro.', 
-    cor: 'linear-gradient(135deg, #0f172a, #1e293b)' 
-  },
-  { 
-    id: 'fakenews', 
-    titulo: 'Combate às Fake News', 
-    imagem: fotoFakeNews, 
-    descricao: 'Aprenda a identificar notícias falsas e saiba como combatê-las.', 
-    cor: 'linear-gradient(135deg, #4c1d95, #6d28d9)' 
-  },
+  { id: 'urna', titulo: 'Urna Eletrônica', imagem: fotoUrna, descricao: 'Aprenda a utilizar a urna eletrônica de forma simples e segura.', cor: 'linear-gradient(135deg, #1e3a8a, #312e81)' },
+  { id: 'processo', titulo: 'Processo Eleitoral', imagem: fotoProcesso, descricao: 'Conheça todo o processo eleitoral no Brasil.', cor: 'linear-gradient(135deg, #0f172a, #1e293b)' },
+  { id: 'fakenews', titulo: 'Combate às Fake News', imagem: fotoFakeNews, descricao: 'Saiba como identificar e combater notícias falsas.', cor: 'linear-gradient(135deg, #4c1d95, #6d28d9)' },
 ];
+
+const API_URL = "http://127.0.0.1:8000";
 
 export default function Trilhas({ emailUsuario, onLogout, onIrParaPerfil }) {
   const [fotoPerfil, setFotoPerfil] = useState(null);
   const [apelido, setApelido] = useState('');
   const [inscricoes, setInscricoes] = useState([]);
+  const [tipoUsuario, setTipoUsuario] = useState('leitor'); 
 
-  useEffect(() => {
-    async function carregarDados() {
-      if (!emailUsuario) return;
-      try {
-        const resPerfil = await axios.get(`http://localhost:8000/perfil/${emailUsuario}`);
-        setApelido(resPerfil.data.apelido);
-        if (resPerfil.data.foto_perfil) setFotoPerfil(`http://localhost:8000${resPerfil.data.foto_perfil}`);
-        
-        const resInscricoes = await axios.get(`http://localhost:8000/inscricoes/${emailUsuario}`);
-        setInscricoes(resInscricoes.data);
-      } catch (error) { console.error("Erro ao carregar dados", error); }
+  // Função encapsulada com useCallback para evitar re-renderizações e loops infinitos
+  const carregarDadosDoServidor = useCallback(async () => {
+    if (!emailUsuario) return;
+    try {
+      const resPerfil = await axios.get(`${API_URL}/perfil/${emailUsuario}`);
+      setApelido(resPerfil.data.apelido);
+      setTipoUsuario(resPerfil.data.tipo_usuario);
+      
+      if (resPerfil.data.foto_perfil) {
+        setFotoPerfil(`${API_URL}${resPerfil.data.foto_perfil}`);
+      } else {
+        setFotoPerfil(null);
+      }
+      
+      const resInscricoes = await axios.get(`${API_URL}/inscricoes/${emailUsuario}`);
+      setInscricoes(resInscricoes.data);
+    } catch (error) { 
+      console.error("Erro ao sincronizar dados:", error); 
     }
-    carregarDados();
   }, [emailUsuario]);
+
+  // Carga inicial estruturada
+  useEffect(() => {
+    carregarDadosDoServidor();
+  }, [carregarDadosDoServidor]);
+
+  // Polling em segundo plano isolado e seguro contra multiplos cliques
+  useEffect(() => {
+    if (tipoUsuario !== 'pendente') return;
+
+    const intervalo = setInterval(() => {
+      carregarDadosDoServidor();
+    }, 4000); // Checa a cada 4 segundos de forma silenciosa
+
+    return () => clearInterval(intervalo);
+  }, [tipoUsuario, carregarDadosDoServidor]);
+
+  const handleSolicitarConteudista = async () => {
+    try {
+      const urlCompleta = `${API_URL}/perfil/${emailUsuario}/solicitar-conteudista`;
+      const response = await axios.post(urlCompleta);
+      alert(response.data.message);
+      setTipoUsuario('pendente'); // Bloqueia o botão na interface imediatamente
+    } catch (error) {
+      alert("Erro: " + (error.response?.data?.detail || "Erro de conexão/rede"));
+    }
+  };
 
   const handleInscrever = async (trilha) => {
     const confirmar = window.confirm(`Deseja realmente se inscrever na trilha: ${trilha.titulo}?`);
     if (confirmar) {
       try {
-        await axios.post(`http://localhost:8000/inscrever?email=${emailUsuario}&trilha_id=${trilha.id}`);
+        await axios.post(`${API_URL}/inscrever?email=${emailUsuario}&trilha_id=${trilha.id}`);
         setInscricoes([...inscricoes, trilha.id]);
         alert("Inscrição realizada com sucesso!");
       } catch (error) {
@@ -70,7 +88,23 @@ export default function Trilhas({ emailUsuario, onLogout, onIrParaPerfil }) {
       <header className="home-header">
         <div className="home-logo"><img src={logo} alt="TDE Logo" /></div>
         <div className="header-actions">
-          <button className="conteudista-btn">Tornar-se Conteudista</button>
+          
+          {tipoUsuario === 'leitor' && (
+            <button className="conteudista-btn" onClick={handleSolicitarConteudista}>
+              Tornar-se Conteudista
+            </button>
+          )}
+          {tipoUsuario === 'pendente' && (
+            <button className="conteudista-btn" disabled style={{ background: '#94a3b8', cursor: 'not-allowed' }}>
+              Aguardando Aprovação...
+            </button>
+          )}
+          {tipoUsuario === 'conteudista' && (
+            <button className="conteudista-btn" style={{ background: '#1d4ed8', cursor: 'pointer' }}>
+              Painel Conteudista
+            </button>
+          )}
+
           <button className="nav-btn" onClick={onIrParaPerfil}>Editar Perfil</button>
           <button className="logout-btn" onClick={onLogout}>Sair</button>
           <div className="header-avatar" onClick={onIrParaPerfil}>
@@ -90,7 +124,6 @@ export default function Trilhas({ emailUsuario, onLogout, onIrParaPerfil }) {
             const estaInscrito = inscricoes.includes(trilha.id);
             return (
               <div key={trilha.id} className="trilha-card">
-                {/* Cabeçalho do Card com Imagem ou Gradiente */}
                 <div className="trilha-card-banner">
                   {trilha.imagem ? (
                     <img src={trilha.imagem} alt={trilha.titulo} className="trilha-banner-img" />
