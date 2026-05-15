@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="540" height="300" viewBox="0 0 540 300" fill="none">
+  <rect width="540" height="300" rx="24" fill="#1D1F2A"/>
+  <rect x="0" y="0" width="540" height="300" rx="24" fill="url(#n)" fill-opacity="0.2"/>
+  <defs>
+    <pattern id="n" width="36" height="36" patternUnits="userSpaceOnUse" patternTransform="rotate(32)">
+      <rect width="36" height="36" fill="#fff" fill-opacity="0"/>
+      <circle cx="4" cy="4" r="2" fill="#fff" fill-opacity="0.45"/>
+    </pattern>
+  </defs>
+  <text x="34" y="98" fill="#E9EAF1" font-size="48" font-family="Inter, Arial" font-weight="700">UMA ELEIÇÃO</text>
+  <text x="34" y="148" fill="#E9EAF1" font-size="48" font-family="Inter, Arial" font-weight="700">CONSCIENTE</text>
+  <text x="34" y="205" fill="#A7ADB9" font-size="42" font-family="Inter, Arial" font-weight="600">FAZ A DIFERENÇA</text>
+</svg>
