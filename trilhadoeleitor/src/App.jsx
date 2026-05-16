@@ -53,7 +53,7 @@ function App() {
         <Cadastro onSwitch={() => setTela('login')} />
       )}
 
-      {/* Home Page Principal do Aluno */}
+      {/* Home Page Principal do Aluno e Eleitor */}
       {tela === 'home' && (
         <Trilhas 
           emailUsuario={emailLogado} 
@@ -70,7 +70,7 @@ function App() {
         <EditarPerfil emailUsuario={emailLogado} onVoltar={() => setTela('home')} />
       )}
 
-      {/* Repositório de Gerenciamento do Conteudista */}
+      {/* Repositório de Gerenciamento Geral do Conteudista */}
       {tela === 'gerenciar-trilhas' && (
         <GerenciarTrilhas 
           emailUsuario={emailLogado} 
@@ -80,21 +80,22 @@ function App() {
         />
       )}
 
-      {/* Formulário de Estrutura Inicial de Trilha */}
+      {/* Formulário de Estrutura Inicial de Novas Trilhas */}
       {tela === 'nova-trilha' && (
         <NovaTrilha onVoltar={() => setTela('gerenciar-trilhas')} />
       )}
 
-      {/* Painel de Incrementação de Conteúdo (Lápis) */}
+      {/* Painel de Incrementação de Conteúdo do Conteudista (Lápis) */}
       {tela === 'painel' && (
         <PainelConteudista trilhaId={trilhaIdEdicao} onVoltar={() => setTela('gerenciar-trilhas')} />
       )}
 
-      {/* Visualização de Aula Teórica Real para o Aluno */}
+      {/* Visualização de Aula Teórica Dinâmica com Trava de Progresso */}
       {tela === 'ver-teoria' && (
         <VisualizarTeoria 
           trilhaId={trilhaVisualizacao.id} 
           trilhaNome={trilhaVisualizacao.nome} 
+          emailUsuario={emailLogado} // ATUALIZAÇÃO CRUCIAL: Passa o e-mail para computar o progresso relacional
           onVoltar={() => setTela('home')} 
         />
       )}

@@ -136,53 +136,115 @@ export default function Trilhas({ emailUsuario, onLogout, onIrParaPerfil, onIrPa
             const estaInscrito = inscricoes.includes(trilha.id);
             const imagemResolvida = mapearImagemTrilha(trilha.imagem);
 
+            // COMPONENTE INTERNO DE CARD DINÂMICO REATIVO PARA GESTÃO INDEPENDENTE DE PROGRESSO
             return (
-              <div key={trilha.id} className="trilha-card">
-                <div className="trilha-card-banner">
-                  {imagemResolvida ? (
-                    <img src={imagemResolvida} alt={trilha.nome} className="trilha-banner-img" />
-                  ) : (
-                    <div className="trilha-banner-fallback" style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }} />
-                  )}
-                </div>
-
-                <div className="trilha-content">
-                  <h3 style={{ textAlign: 'left', margin: '0 0 8px' }}>{trilha.nome}</h3>
-                  <p style={{ textAlign: 'left', margin: '0 0 16px', minHeight: '42px' }}>{trilha.descricao}</p>
-                  
-                  <div style={{ textAlign: 'left' }}>
-                    <span style={{ display: 'inline-block', fontSize: '11px', fontWeight: 600, color: '#1e40af', background: '#dbeafe', padding: '2px 8px', borderRadius: '4px', marginBottom: '16px' }}>
-                      {trilha.categoria} • {trilha.nivel}
-                    </span>
-                  </div>
-
-                  {estaInscrito ? (
-                    <div className="actions-row">
-                      <button 
-                        className="action-btn" 
-                        onClick={() => onVisualizarTeoria(trilha.id, trilha.nome)}
-                      >
-                        Teoria
-                      </button>
-                      <button 
-                        className="action-btn" 
-                        onClick={() => onVisualizarQuiz(trilha.id, trilha.nome)}
-                      >
-                        Quiz
-                      </button>
-                      <button className="action-btn" onClick={() => alert("Módulo Prático em desenvolvimento")}>Prática</button>
-                    </div>
-                  ) : (
-                    <button className="btn-inscrever" onClick={() => handleInscrever(trilha)}>
-                      Inscrever-se na Trilha
-                    </button>
-                  )}
-                </div>
-              </div>
+              <TrilhaCardItem 
+                key={trilha.id}
+                trilha={trilha}
+                estaInscrito={estaInscrito}
+                imagemResolvida={imagemResolvida}
+                emailUsuario={emailUsuario}
+                onVisualizarTeoria={onVisualizarTeoria}
+                onVisualizarQuiz={onVisualizarQuiz}
+                handleInscrever={handleInscrever}
+              />
             );
           })}
         </div>
       </main>
+    </div>
+  );
+}
+
+// SUB-COMPONENTE INTERNO PARA ISOLAR A BUSCA DE PROGRESSO DE CADA CARD EVITANDO CONFLITOS DE ESTADO
+function TrilhaCardItem({ trilha, estaInscrito, imagemResolvida, emailUsuario, onVisualizarTeoria, onVisualizarQuiz, handleInscrever }) {
+  const [progressoDados, setProgressoDados] = useState({ porridge: 0, liberado_quiz: false });
+
+  // Dispara a chamada ao endpoint de progresso dinâmico apenas se o aluno for matriculado na trilha
+  useEffect(() => {
+    if (estaInscrito && emailUsuario) {
+      axios.get(`${API_URL}/trilhas/${trilha.id}/progresso/${emailUsuario}`)
+        .then(res => setProgressoDados(res.data))
+        .catch(err => console.error("Erro ao computar barra de progresso:", err));
+    }
+  }, [estaInscrito, trilha.id, emailUsuario]);
+
+  return (
+    <div className="trilha-card">
+      <div className="trilha-card-banner">
+        {imagemResolvida ? (
+          <img src={imagemResolvida} alt={trilha.nome} className="trilha-banner-img" />
+        ) : (
+          <div className="trilha-banner-fallback" style={{ background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)' }} />
+        )}
+      </div>
+
+      <div className="trilha-content">
+        <h3 style={{ textAlign: 'left', margin: '0 0 8px' }}>{trilha.nome}</h3>
+        <p style={{ textAlign: 'left', margin: '0 0 16px', minHeight: '42px' }}>{trilha.descricao}</p>
+        
+        <div style={{ textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <span style={{ display: 'inline-block', fontSize: '11px', fontWeight: 600, color: '#1e40af', background: '#dbeafe', padding: '2px 8px', borderRadius: '4px' }}>
+            {trilha.categoria} • {trilha.nivel}
+          </span>
+        </div>
+
+        {/* ESTRUTURA VISUAL DA BARRA DE PROGRESSO EM TEMPO REAL */}
+        {estaInscrito && (
+          <div style={{ marginBottom: '18px', textAlign: 'left' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 'bold', color: '#64748b', marginBottom: '4px' }}>
+              <span>Progresso de Leitura</span>
+              <span>{progressoDados.porcentagem}%</span>
+            </div>
+            <div style={{ width: '100%', height: '6px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
+              <div 
+                style={{ 
+                  width: `${progressoDados.porcentagem}%`, 
+                  height: '100%', 
+                  background: '#22c55e', 
+                  transition: 'width 0.5s ease-in-out' 
+                }}
+              ></div>
+            </div>
+          </div>
+        )}
+
+        {estaInscrito ? (
+          <div className="actions-row">
+            <button 
+              className="action-btn" 
+              onClick={() => onVisualizarTeoria(trilha.id, trilha.nome)}
+            >
+              Teoria
+            </button>
+            
+            {/* TRAVA PEDAGÓGICA BLINDADA DO QUIZ COM CADEADO E AVISO MANIPULADO */}
+            <button 
+              className="action-btn" 
+              onClick={() => {
+                if (progressoDados.liberado_quiz) {
+                  onVisualizarQuiz(trilha.id, trilha.nome);
+                } else {
+                  alert(`🔒 Acesso Trancado!\n\nSeu progresso atual nesta trilha é de ${progressoDados.porcentagem}%. Você precisa ler e concluir 100% dos capítulos teóricos disponibilizados antes de abrir as avaliações.`);
+                }
+              }}
+              style={{ 
+                background: progressoDados.liberado_quiz ? '#beceea' : '#94a3b8', 
+                cursor: progressoDados.liberado_quiz ? 'pointer' : 'not-allowed',
+                opacity: progressoDados.liberado_quiz ? 1 : 0.7 
+              }}
+            >
+              {progressoDados.liberado_quiz ? "Quiz" : "🔒 Quiz"}
+            </button>
+            
+            <button className="action-btn" onClick={() => alert("Módulo Prático em desenvolvimento")}>Prática</button>
+          </div>
+        ) : (
+          <button className="btn-inscrever" onClick={() => handleInscrever(trilha)}>
+            Inscrever-se na Trilha
+          </button>
+        )}
+      </div>
     </div>
   );
 }
