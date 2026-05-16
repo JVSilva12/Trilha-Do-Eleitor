@@ -1,108 +1,126 @@
 import api from '../api';
-import { emailUsuarioLogado } from './authService';
 
-export const CATEGORIAS_FIXAS = [
-  'Processo Eleitoral',
-  'Segurança do Voto',
-  'Educação eleitoral',
-  'Cidadania Digital',
-];
-
-function obterEmailSessao() {
-  const email = emailUsuarioLogado();
-  if (!email) {
-    throw new Error('Sessão inválida. Faça login novamente.');
+/**
+ * 1. Busca todas as trilhas cadastradas no banco de dados SQLite (Python FastAPI)
+ */
+export const listarTrilhas = async () => {
+  try {
+    const response = await api.get('/trilhas');
+    return response.data; // Retorna o array de trilhas vindo do banco
+  } catch (error) {
+    console.error("Erro ao listar trilhas do servidor:", error);
+    throw error;
   }
-  return email;
-}
+};
 
-export function listarCategorias() {
-  return [...CATEGORIAS_FIXAS];
-}
+/**
+ * 2. Envia os dados do formulário para salvar uma nova trilha educativa no banco
+ */
+export const criarTrilha = async (dadosTrilha) => {
+  try {
+    // Envia o payload no padrão JSON esperado pelo TrilhaSchema do Pydantic
+    const response = await api.post('/trilhas', {
+      nome: dadosTrilha.nome,
+      descricao: dadosTrilha.descricao,
+      categoria: dadosTrilha.categoria,
+      nivel: dadosTrilha.nivel,
+      imagem: dadosTrilha.imagem || null,
+      status: dadosTrilha.status || 'rascunho',
+      visibilidade: dadosTrilha.visibilidade || 'Pública'
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao cadastrar nova trilha no servidor:", error);
+    throw error;
+  }
+};
 
-export function filtrarTrilhas({ trilhas = [], busca = '', categoria = 'todas', status = 'todas' }) {
-  const termo = busca.trim().toLowerCase();
+/**
+ * 3. Remove uma trilha de forma definitiva do banco de dados utilizando o ID numérico
+ */
+export const excluirTrilha = async (trilhaId) => {
+  try {
+    const response = await api.delete(`/trilhas/${trilhaId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Erro ao remover a trilha ID ${trilhaId}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * 4. Salva ou atualiza a aula teórica (com texto e link de vídeo) de uma trilha
+ */
+export const salvarTeoriaTrilha = async (trilhaId, dadosTeoria) => {
+  const response = await api.post(`/trilhas/${trilhaId}/teoria`, dadosTeoria);
+  return response.data;
+};
+
+/**
+ * 5. Busca o texto e vídeo de teoria cadastrados de uma trilha específica
+ */
+export const buscarTeoriaTrilha = async (trilhaId) => {
+  const response = await api.get(`/trilhas/${trilhaId}/teoria`);
+  return response.data;
+};
+
+/**
+ * 6. Adiciona uma nova pergunta de múltipla escolha ao banco do Quiz da trilha
+ */
+export const adicionarPerguntaQuiz = async (trilhaId, dadosQuiz) => {
+  const response = await api.post(`/trilhas/${trilhaId}/quiz`, dadosQuiz);
+  return response.data;
+};
+
+/**
+ * 7. Recupera o caderno completo de questões do Quiz de uma trilha específica
+ */
+export const listarPerguntasQuiz = async (trilhaId) => {
+  const response = await api.get(`/trilhas/${trilhaId}/quiz`);
+  return response.data;
+};
+
+/**
+ * =========================================================================
+ * FUNÇÕES AUXILIARES DE SUPORTE (Mantidas para não quebrar o GerenciarTrilhas)
+ * =========================================================================
+ */
+
+/**
+ * Filtra a lista de trilhas em tempo de execução no frontend com base na busca por texto,
+ * na categoria selecionada e no status (Todas, Publicadas ou Rascunhos).
+ */
+export const filtrarTrilhas = ({ trilhas, busca, categoria, status }) => {
+  if (!trilhas || !Array.isArray(trilhas)) return [];
 
   return trilhas.filter((trilha) => {
-    const matchBusca = trilha.nome.toLowerCase().includes(termo);
-    const matchCategoria = categoria === 'todas' || trilha.categoria === categoria;
-    const matchStatus = status === 'todas' || trilha.status === status;
-    return matchBusca && matchCategoria && matchStatus;
+    // Filtro por termo de busca (Nome)
+    const correspondeBusca = busca
+      ? trilha.nome.toLowerCase().includes(busca.toLowerCase())
+      : true;
+
+    // Filtro por Categoria
+    const correspondeCategoria = categoria && categoria !== 'todas'
+      ? trilha.categoria === categoria
+      : true;
+
+    // Filtro por Status (Tabs)
+    const correspondeStatus = status && status !== 'todas'
+      ? trilha.status === status
+      : true;
+
+    return correspondeBusca && correspondeCategoria && correspondeStatus;
   });
-}
+};
 
-export async function listarTrilhas() {
-  const email = obterEmailSessao();
-  const { data } = await api.get('/trilhas', { params: { email } });
-  return data;
-}
-
-export async function buscarTrilhaPorId(id) {
-  const { data } = await api.get(`/trilhas/${id}`);
-  return data;
-}
-
-export async function criarTrilha(payload) {
-  const email = obterEmailSessao();
-  const body = {
-    email_conteudista: email,
-    nome: payload.nome,
-    descricao: payload.descricao,
-    categoria: payload.categoria,
-    nivel: payload.nivel,
-    imagem: payload.imagem || null,
-    status: payload.status,
-    visibilidade: payload.visibilidade,
-  };
-
-  const { data } = await api.post('/trilhas', body);
-  return data;
-}
-
-export async function atualizarTrilha(id, payload) {
-  const { data } = await api.put(`/trilhas/${id}`, payload);
-  return data;
-}
-
-export async function excluirTrilha(id) {
-  await api.delete(`/trilhas/${id}`);
-}
-
-export async function publicarTrilha(id) {
-  const { data } = await api.post(`/trilhas/${id}/publicar`);
-  return data;
-}
-
-export async function listarModulosPorTrilha(id) {
-  const { data } = await api.get(`/trilhas/${id}/modulos`);
-  return data;
-}
-
-export async function criarModulo(trilhaId, payload) {
-  const body = {
-    titulo: payload.titulo,
-    videos: Number(payload.videos || 0),
-    textos: Number(payload.textos || 0),
-    quizzes: Number(payload.quizzes || 0),
-    duracao: payload.duracao || '0 min',
-    status: payload.status || 'rascunho',
-    videoAdicionado: Boolean(payload.videoAdicionado),
-    textoAdicionado: Boolean(payload.textoAdicionado),
-    quizAdicionado: Boolean(payload.quizAdicionado),
-  };
-
-  const { data } = await api.post(`/trilhas/${trilhaId}/modulos`, body);
-  return data;
-}
-
-export async function atualizarModulo(trilhaId, moduloId, payload) {
-  const body = {
-    ...payload,
-    videos: payload.videos !== undefined ? Number(payload.videos) : undefined,
-    textos: payload.textos !== undefined ? Number(payload.textos) : undefined,
-    quizzes: payload.quizzes !== undefined ? Number(payload.quizzes) : undefined,
-  };
-
-  const { data } = await api.put(`/trilhas/${trilhaId}/modulos/${moduloId}`, body);
-  return data;
-}
+/**
+ * Extrai dinamicamente todas as categorias únicas das trilhas existentes 
+ * para popular o menu suspenso (select) de filtros do cabeçalho.
+ */
+export const listarCategorias = (trilhas) => {
+  if (!trilhas || !Array.isArray(trilhas)) return [];
+  
+  // Utiliza o Set para remover duplicatas automaticamente
+  const listaUnica = new Set(trilhas.map((trilha) => trilha.categoria));
+  return Array.from(listaUnica);
+};
