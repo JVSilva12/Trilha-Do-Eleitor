@@ -2,6 +2,7 @@ import os
 import shutil
 import re
 import smtplib
+from contextlib import asynccontextmanager
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, BackgroundTasks
@@ -10,17 +11,68 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 import models, database
 from pwdlib import PasswordHash
 
 # Garante a existência do diretório de uploads local
 os.makedirs("uploads", exist_ok=True)
 
-# Inicializa as tabelas mapeadas no banco de dados SQLite
-models.Base.metadata.create_all(bind=database.engine)
+# GERENCIADOR DE CICLO DE VIDA (Lifespan) - Executa ações na inicialização e encerramento
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Inicializa as tabelas mapeadas no banco de dados SQLite automaticamente
+    models.Base.metadata.create_all(bind=database.engine)
+    
+    # Executa a Carga Inicial Pedagógica na inicialização do servidor
+    db = database.SessionLocal()
+    try:
+        total_trilhas = db.query(models.Trilha).count()
+        if total_trilhas == 0:
+            trilhas_padrao = [
+                models.Trilha(
+                    id=1,
+                    nome="Urna Eletrônica",
+                    descricao="Aprenda a utilizar a urna eletrônica de forma simples e prática.",
+                    categoria="Educação eleitoral",
+                    nivel="Básico",
+                    imagem="urna",
+                    status="publicada",
+                    visibilidade="Pública"
+                ),
+                models.Trilha(
+                    id=2,
+                    nome="Processo Eleitoral",
+                    descricao="Aprenda como funciona o processo eleitoral em território brasileiro.",
+                    categoria="Cidadania",
+                    nivel="Intermediário",
+                    imagem="processo",
+                    status="publicada",
+                    visibilidade="Pública"
+                ),
+                models.Trilha(
+                    id=3,
+                    nome="Combate às Fake News",
+                    descricao="Aprenda a identificar notícias falsas e saiba como combatê-las.",
+                    categoria="Segurança Informacional",
+                    nivel="Avançado",
+                    imagem="fakenews",
+                    status="publicada",
+                    visibilidade="Pública"
+                )
+            ]
+            db.add_all(trilhas_padrao)
+            db.commit()
+            print("✓ Carga inicial das 3 trilhas padrão realizada com sucesso via Lifespan!")
+    except Exception as e:
+        print(f"Erro na carga inicial: {e}")
+    finally:
+        db.close()
+        
+    yield # Divide o momento da inicialização do encerramento do app
 
-app = FastAPI()
+# Inicializa o FastAPI passando o manipulador de ciclo de vida
+app = FastAPI(lifespan=lifespan)
 
 # Configuração de CORS (Essencial para comunicação com o React em localhost:5173)
 app.add_middleware(
@@ -42,7 +94,8 @@ EMAIL_ADM = "trilhadoeleitor.adm@gmail.com"
 # COLOQUE AQUI AS 16 LETRAS DA SENHA DE APLICATIVO DO GMAIL (SEM ESPAÇOS)
 EMAIL_PASSWORD = "qyld xtgg nijt vids" 
 
-# Modelos Pydantic para validação de entrada de dados (Payloads JSON)
+# --- MODELOS PYDANTIC PARA VALIDAÇÃO DE ENTRADA/SAÍDA ---
+
 class UserUpdate(BaseModel):
     apelido: str
     email: str
@@ -50,7 +103,54 @@ class UserUpdate(BaseModel):
     senha_atual: Optional[str] = None
     nova_senha: Optional[str] = None
 
-# Funções Auxiliares de Validação Técnica
+class TrilhaSchema(BaseModel):
+    id: Optional[int] = None
+    nome: str
+    descricao: str
+    categoria: str
+    nivel: str
+    imagem: Optional[str] = None
+    status: Optional[str] = "rascunho"
+    visibilidade: Optional[str] = "Pública"
+
+    class Config:
+        from_attributes = True
+
+# Schemas Pydantic reestruturados para suportar os blocos dinâmicos intercalados
+class BlocoSchema(BaseModel):
+    tipo: str  # 'texto', 'imagem', 'video'
+    valor: str
+    ordem: int
+
+class TeoriaCreateSchema(BaseModel):
+    trilha_id: int
+    titulo: str
+    blocos: List[BlocoSchema] = []
+
+class TeoriaResponseSchema(BaseModel):
+    id: int
+    trilha_id: int
+    titulo: str
+    blocos: List[BlocoSchema] = []
+
+    class Config:
+        from_attributes = True
+
+class QuizSchema(BaseModel):
+    id: Optional[int] = None
+    trilha_id: int
+    enunciado: str
+    alternativa_a: str
+    alternativa_b: str
+    alternativa_c: str
+    alternativa_d: str
+    resposta_correta: str
+
+    class Config:
+        from_attributes = True
+
+# --- FUNÇÕES AUXILIARES DE SUPORTE ---
+
 def validar_complexidade_senha(password: str):
     if len(password) < 8:
         raise HTTPException(status_code=400, detail="A senha deve ter no mínimo 8 caracteres.")
@@ -66,9 +166,8 @@ def enviar_email_real(nome_usuario: str, email_usuario: str):
         mensagem = MIMEMultipart()
         mensagem["From"] = EMAIL_ADM
         mensagem["To"] = EMAIL_ADM
-        mensagem["Subject"] = f"Nova Solicitação de Conteudista: {nome_usuario}"
+        mensagem["Subject"] = f"🔔 Nova Solicitação de Conteudista: {nome_usuario}"
 
-        # INCLUSÃO CRUCIAL DA PORTA :8000 NO LINK DO E-MAIL
         base_url = "http://localhost:8000/admin/aprovar"
         link_aprovacao = f"{base_url}?email={email_usuario}"
 
@@ -76,7 +175,7 @@ def enviar_email_real(nome_usuario: str, email_usuario: str):
         <html>
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
                 <h2 style="color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">Solicitação de Upgrade de Conta</h2>
-                <p>O seguinte usuário solicitou permissões de <strong>Conteudista</strong> na plataforma Trilha do Eleitor:</p>
+                <p>O seguinte usuário solicitou permissões de <strong>Conteudista</strong> na plataforma Trilhas do Eleitor:</p>
                 <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 15px 0;">
                     <p style="margin: 5px 0;"><strong>Apelido:</strong> {nome_usuario}</p>
                     <p style="margin: 5px 0;"><strong>E-mail:</strong> {email_usuario}</p>
@@ -86,13 +185,12 @@ def enviar_email_real(nome_usuario: str, email_usuario: str):
                     <a href="{link_aprovacao}" style="display: inline-block; padding: 12px 30px; background-color: #22c55e; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.2);">Aprovar Novo Conteudista</a>
                 </p>
                 <hr style="border: 0; border-top: 1px solid #eee; margin-top: 30px;">
-                <p style="font-size: 11px; color: #777; text-align: center;">Este é um e-mail automatizado gerado pelo sistema Trilha do Eleitor.</p>
+                <p style="font-size: 11px; color: #777; text-align: center;">Este é um e-mail automatizado gerado pelo sistema Trilhas do Eleitor.</p>
             </body>
         </html>
         """
         mensagem.attach(MIMEText(corpo_html, "html"))
 
-        # Endereço SMTP oficial do Google
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
         server.login(EMAIL_ADM, EMAIL_PASSWORD)
@@ -152,14 +250,12 @@ def atualizar_perfil(email_atual: str, dados: UserUpdate, db: Session = Depends(
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     
-    # Validação do Apelido
     if not dados.apelido or not dados.apelido.strip():
         raise HTTPException(status_code=400, detail="O apelido é obrigatório.")
     
     user.apelido = dados.apelido.strip()
     user.telefone = dados.telefone
     
-    # Validação e Criptografia caso queira atualizar a Senha
     if dados.nova_senha:
         if not dados.senha_atual or not password_hash.verify(dados.senha_atual, user.hashed_password):
             raise HTTPException(status_code=400, detail="Senha atual incorreta")
@@ -198,30 +294,145 @@ def remover_foto(email: str, db: Session = Depends(database.get_db)):
     return {"message": "Foto removida com sucesso"}
 
 
-# --- ROTAS DO SISTEMA DE TRILHAS (INSCRIÇÕES) ---
+# --- ROTAS DO SISTEMA DE TRILHAS (INSCRIÇÕES DOS ALUNOS) ---
 
 @app.get("/inscricoes/{email}")
 def listar_inscricoes(email: str, db: Session = Depends(database.get_db)):
     inscricoes = db.query(models.Inscricao).filter(models.Inscricao.user_email == email).all()
-    return [i.trilha_id for i in inscricoes]
+    return [int(i.trilha_id) for i in inscricoes if i.trilha_id.isdigit()]
 
 @app.post("/inscrever")
-def inscrever_trilha(email: str, trilha_id: str, db: Session = Depends(database.get_db)):
+def inscrever_trilha(email: str, trilha_id: int, db: Session = Depends(database.get_db)):
+    trilha = db.query(models.Trilha).filter(models.Trilha.id == trilha_id).first()
+    if not trilha:
+        raise HTTPException(status_code=404, detail="Trilha educativa não encontrada.")
+
     existe = db.query(models.Inscricao).filter(
         models.Inscricao.user_email == email, 
-        models.Inscricao.trilha_id == trilha_id
+        models.Inscricao.trilha_id == str(trilha_id)
     ).first()
     
     if existe:
-        raise HTTPException(status_code=400, detail="Já inscrito nesta trilha.")
+        raise HTTPException(status_code=400, detail="Você já está inscrito nesta trilha.")
     
-    nova_inscricao = models.Inscricao(user_email=email, trilha_id=trilha_id)
+    nova_inscricao = models.Inscricao(user_email=email, trilha_id=str(trilha_id))
     db.add(nova_inscricao)
     db.commit()
     return {"message": "Inscrição realizada!"}
 
 
-# --- ROTAS ADMINISTRATIVAS (CONTEUDISTA) ---
+# --- ROTAS DO GERENCIADOR DE TRILHAS (CRUD PRINCIPAL DO CONTEUDISTA) ---
+
+@app.get("/trilhas", response_model=List[TrilhaSchema])
+def listar_todas_trilhas(db: Session = Depends(database.get_db)):
+    return db.query(models.Trilha).all()
+
+@app.post("/trilhas", response_model=TrilhaSchema)
+def cadastrar_nova_trilha(trilha: TrilhaSchema, db: Session = Depends(database.get_db)):
+    nova_trilha = models.Trilha(
+        nome=trilha.nome,
+        descricao=trilha.descricao,
+        categoria=trilha.categoria,
+        nivel=trilha.nivel,
+        imagem=trilha.imagem,
+        status=trilha.status,
+        visibilidade=trilha.visibilidade
+    )
+    db.add(nova_trilha)
+    db.commit()
+    db.refresh(nova_trilha)
+    return nova_trilha
+
+@app.delete("/trilhas/{trilha_id}")
+def deletar_trilha_pedagogica(trilha_id: int, db: Session = Depends(database.get_db)):
+    trilha = db.query(models.Trilha).filter(models.Trilha.id == trilha_id).first()
+    if not trilha:
+        raise HTTPException(status_code=404, detail="Trilha educativa não encontrada.")
+    db.delete(trilha)
+    db.commit()
+    return {"message": "Trilha educativa excluída de forma definitiva!"}
+
+
+# --- ROTA DE ARQUIVOS INTERNOS: SALVA ARQUIVOS DO COMPUTADOR PARA AS TRILHAS ---
+
+@app.post("/trilhas/upload-imagem")
+def upload_imagem_teoria(file: UploadFile = File(...)):
+    try:
+        nome_arquivo = f"teoria_{file.filename.replace(' ', '_')}"
+        file_location = f"uploads/{nome_arquivo}"
+        
+        with open(file_location, "wb+") as file_object:
+            shutil.copyfileobj(file.file, file_object)
+            
+        return {"url_imagem": f"http://127.0.0{file_location}"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao salvar arquivo físico: {str(e)}")
+
+
+# --- ROTAS DE PROMOÇÃO PEDAGÓGICA (AULAS EM BLOCOS INTERCALADOS E PERGUNTAS DE QUIZ) ---
+
+@app.post("/trilhas/{trilha_id}/teoria", response_model=TeoriaResponseSchema)
+def salvar_teoria_trilha(trilha_id: int, teoria: TeoriaCreateSchema, db: Session = Depends(database.get_db)):
+    db_teoria = db.query(models.ConteudoTeoria).filter(models.ConteudoTeoria.trilha_id == trilha_id).first()
+    if db_teoria:
+        db_teoria.titulo = teoria.titulo
+        db_teoria.blocos.clear() # Limpa a sequência antiga para reescrever os novos inputs ordenados
+    else:
+        db_teoria = models.ConteudoTeoria(trilha_id=trilha_id, titulo=teoria.titulo)
+        db.add(db_teoria)
+    db.commit()
+
+    # Adiciona cada bloco sequencial (Texto, Imagem ou Vídeo) mapeado na interface gráfica
+    for b in teoria.blocos:
+        if b.valor.strip():
+            novo_bloco = models.BlocoTeoria(tipo=b.tipo, valor=b.valor.strip(), ordem=b.ordem)
+            db_teoria.blocos.append(novo_bloco)
+
+    db.commit()
+    db.refresh(db_teoria)
+
+    return {
+        "id": db_teoria.id,
+        "trilha_id": db_teoria.trilha_id,
+        "titulo": db_teoria.titulo,
+        "blocos": [{"tipo": blk.tipo, "valor": blk.valor, "ordem": blk.ordem} for blk in db_teoria.blocos]
+    }
+
+@app.get("/trilhas/{trilha_id}/teoria", response_model=TeoriaResponseSchema)
+def buscar_teoria_trilha(trilha_id: int, db: Session = Depends(database.get_db)):
+    teoria = db.query(models.ConteudoTeoria).filter(models.ConteudoTeoria.trilha_id == trilha_id).first()
+    if not teoria: 
+        raise HTTPException(status_code=404, detail="Conteúdo teórico ainda não cadastrado para esta trilha.")
+    
+    return {
+        "id": teoria.id,
+        "trilha_id": teoria.trilha_id,
+        "titulo": teoria.titulo,
+        "blocos": [{"tipo": blk.tipo, "valor": blk.valor, "ordem": blk.ordem} for blk in teoria.blocos]
+    }
+
+@app.post("/trilhas/{trilha_id}/quiz", response_model=QuizSchema)
+def adicionar_pergunta_quiz(trilha_id: int, quiz: QuizSchema, db: Session = Depends(database.get_db)):
+    nova_questao = models.PerguntaQuiz(
+        trilha_id=trilha_id,
+        enunciado=quiz.enunciado,
+        alternativa_a=quiz.alternativa_a,
+        alternativa_b=quiz.alternativa_b,
+        alternativa_c=quiz.alternativa_c,
+        alternativa_d=quiz.alternativa_d,
+        resposta_correta=quiz.resposta_correta
+    )
+    db.add(nova_questao)
+    db.commit()
+    db.refresh(nova_questao)
+    return nova_questao
+
+@app.get("/trilhas/{trilha_id}/quiz", response_model=List[QuizSchema])
+def listar_perguntas_quiz(trilha_id: int, db: Session = Depends(database.get_db)):
+    return db.query(models.PerguntaQuiz).filter(models.PerguntaQuiz.trilha_id == trilha_id).all()
+
+
+# --- ROTAS ADMINISTRATIVAS (MODERAÇÃO CONTEUDISTA COM REDIRECIONAMENTO HTML) ---
 
 @app.post("/perfil/{email}/solicitar-conteudista")
 def solicitar_conteudista(email: str, background_tasks: BackgroundTasks, db: Session = Depends(database.get_db)):
@@ -240,18 +451,11 @@ def solicitar_conteudista(email: str, background_tasks: BackgroundTasks, db: Ses
     background_tasks.add_task(enviar_email_real, user.apelido, email)
     return {"message": "Solicitação enviada com sucesso! Aguarde a moderação dos administradores."}
 
-# Rota de aprovação corrigida com retorno HTML
 @app.get("/admin/aprovar", response_class=HTMLResponse)
 def aprovar_conteudista(email: str, db: Session = Depends(database.get_db)):
     user = db.query(models.User).filter(models.User.email == email).first()
     if not user:
-        return """
-        <html>
-            <body style="font-family: Arial, sans-serif; text-align: center; padding-top: 50px;">
-                <h2 style="color: #ef4444;">❌ Erro: Usuário não encontrado no banco de dados.</h2>
-            </body>
-        </html>
-        """
+        return "<html><body style='font-family: Arial; text-align: center; padding-top: 50px;'><h2 style='color: #ef4444;'>❌ Erro: Usuário não encontrado.</h2></body></html>"
     
     user.tipo_usuario = "conteudista"
     db.commit()
