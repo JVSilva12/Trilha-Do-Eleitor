@@ -34,6 +34,10 @@ class Trilha(Base):
     imagem = Column(String, nullable=True)
     status = Column(String, default="rascunho") 
     visibilidade = Column(String, default="Pública")
+    
+    # Colunas de carimbo de data/hora automatizadas pelo SQLite
+    data_criacao = Column(DateTime(timezone=True), server_default=func.now())
+    data_atualizacao = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 class ConteudoTeoria(Base):
     __tablename__ = "conteudos_teoria"
@@ -41,9 +45,9 @@ class ConteudoTeoria(Base):
     id = Column(Integer, primary_key=True, index=True)
     trilha_id = Column(Integer, ForeignKey("trilhas.id", ondelete="CASCADE"))
     titulo = Column(String)
+    ordem_modulo = Column(Integer, default=0) # NOVA COLUNA: Define a sequência do módulo na trilha
     
-    # Relacionamento de 1 para Muitos com a tabela de blocos dinâmicos
-    # O parametro order_by garante que o SQLite devolva os blocos na sequência exata definida
+    # Relacionamento que traz os blocos do módulo específico ordenados
     blocos = relationship(
         "BlocoTeoria", 
         back_populates="teoria", 
@@ -51,15 +55,15 @@ class ConteudoTeoria(Base):
         order_by="BlocoTeoria.ordem"
     )
 
-# TABELA CO-RELACIONAL: ARMAZENA CADA ELEMENTO INTERCALADO DA AULA
+# Tabela que armazena cada elemento (parágrafo, foto ou link de vídeo) do módulo
 class BlocoTeoria(Base):
     __tablename__ = "blocos_teoria"
 
     id = Column(Integer, primary_key=True, index=True)
     teoria_id = Column(Integer, ForeignKey("conteudos_teoria.id", ondelete="CASCADE"))
     tipo = Column(String)  # 'texto', 'imagem' ou 'video'
-    valor = Column(Text)   # Guarda o texto da aula OU o link/URL da mídia
-    ordem = Column(Integer) # Índice numérico sequencial da linha (0, 1, 2, etc)
+    valor = Column(Text)   # Guarda o bloco de texto ou a URL da mídia
+    ordem = Column(Integer) # Índice de ordenação na linha temporal da aula
 
     teoria = relationship("ConteudoTeoria", back_populates="blocos")
 
@@ -73,4 +77,12 @@ class PerguntaQuiz(Base):
     alternativa_b = Column(String)
     alternativa_c = Column(String)
     alternativa_d = Column(String)
-    resposta_correta = Column(String) # Guarda a letra maiúscula do gabarito: 'A', 'B', 'C' ou 'D'
+    resposta_correta = Column(String) # 'A', 'B', 'C' ou 'D'
+
+class ProgressoModulo(Base):
+    __tablename__ = "progresso_modulos"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_email = Column(String, ForeignKey("users.email", ondelete="CASCADE"))
+    trilha_id = Column(Integer, ForeignKey("trilhas.id", ondelete="CASCADE"))
+    modulo_id = Column(Integer, ForeignKey("conteudos_teoria.id", ondelete="CASCADE"))

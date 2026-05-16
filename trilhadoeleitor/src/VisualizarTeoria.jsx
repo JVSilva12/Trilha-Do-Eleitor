@@ -1,45 +1,82 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { ArrowLeftIcon, BookOpenIcon } from './Icons';
+import { ArrowLeftIcon, BookOpenIcon, FileTextIcon } from './Icons';
 import './VisualizarTeoria.css';
 
 // Definição global da URL Base para blindar requisições do Axios
 const API_URL = "http://127.0.0.1:8000";
 
-export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar }) {
-  const [aula, setAula] = useState(null);
+export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, emailUsuario }) {
+  // Controle de estado para navegação interna de capítulos
+  const [modulos, setModulos] = useState([]); // Guarda a lista de sumário das aulas
+  const [moduloSelecionado, setModuloSelecionado] = useState(null); // Guarda a aula aberta no momento
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(false);
 
+  // Efeito 1: Busca o sumário completo de capítulos associados a esta trilha no banco
   useEffect(() => {
-    async function obterConteudo() {
+    async function obterListaModulos() {
       if (!trilhaId) return;
       try {
         setCarregando(true);
         setErro(false);
-        // Faz a busca na rota adaptada para a estrutura de blocos dinâmicos
-        const response = await axios.get(`${API_URL}/trilhas/${trilhaId}/teoria`);
-        setAula(response.data);
+        const response = await axios.get(`${API_URL}/trilhas/${trilhaId}/modulos`);
+        setModulos(response.data);
       } catch (err) {
-        console.error("Erro ao carregar teoria:", err);
+        console.error("Erro ao listar sumário de módulos:", err);
         setErro(true);
       } finally {
         setCarregando(false);
       }
     }
-    obterConteudo();
+    obterListaModulos();
   }, [trilhaId]);
+
+  // Efeito 2: Carrega a sequência de blocos de mídias do capítulo que o aluno clicou
+  const handleCarregarModuloEspecifico = async (moduloId) => {
+    try {
+      setCarregando(true);
+      const response = await axios.get(`${API_URL}/modulos/${moduloId}`);
+      setModuloSelecionado(response.data);
+    } catch (err) {
+      alert("Erro ao abrir os blocos didáticos deste capítulo.");
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  // CORREÇÃO: Registra a conclusão do capítulo no banco antes de voltar para o sumário
+  const handleRetornarAoSumario = async () => {
+    if (moduloSelecionado && moduloSelecionado.id && emailUsuario) {
+      try {
+        // Dispara a rota do FastAPI para computar a leitura do módulo atual
+        await axios.post(`${API_URL}/trilhas/${trilhaId}/concluir-modulo/${moduloSelecionado.id}?email=${emailUsuario}`);
+      } catch (err) {
+        console.error("Erro ao registrar conclusão do módulo no backend:", err);
+      }
+    }
+    // Reseta o estado para voltar a exibir o menu do sumário
+    setModuloSelecionado(null);
+    setCarregando(false);
+  };
 
   return (
     <div className="teoria-page">
       <header className="teoria-header">
         <div className="header-left">
-          <button className="icon-button" onClick={onVoltar} title="Voltar para Trilhas">
+          {/* Se estiver lendo um módulo, volta pro sumário. Se estiver no sumário, volta pra home */}
+          <button 
+            className="icon-button" 
+            onClick={moduloSelecionado ? handleRetornarAoSumario : onVoltar} 
+            title={moduloSelecionado ? "Voltar para o sumário" : "Voltar para as trilhas"}
+          >
             <ArrowLeftIcon />
           </button>
           <div className="header-titles">
             <h1 className="header-title">{trilhaNome}</h1>
-            <p className="header-subtitle">Fluxo de Estudos Sequencial</p>
+            <p className="header-subtitle">
+              {moduloSelecionado ? `Lendo: ${moduloSelecionado.titulo}` : "Sumário de Conteúdos Teóricos"}
+            </p>
           </div>
         </div>
       </header>
@@ -47,30 +84,65 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar }) {
       <main className="teoria-main">
         {carregando && (
           <div className="teoria-card estado-info">
-            <p>Carregando o material didático do servidor...</p>
+            <p>Carregando dados do servidor de banco de dados...</p>
           </div>
         )}
 
-        {erro && !carregando && (
-          <div className="teoria-card estado-info">
-            <h3 style={{ color: '#64748b', margin: '0 0 8px 0' }}>📚 Aula em Construção</h3>
-            <p style={{ margin: 0 }}>O Conteudista responsável ainda não publicou o texto teórico para este módulo. Retorne em breve!</p>
-            <button className="btn-primary" onClick={onVoltar} style={{ marginTop: '16px', maxWidth: '150px' }}>Voltar</button>
-          </div>
+        {/* =========================================================================
+           ESTÁGIO 1: EXIBE A LISTA DE CAPÍTULOS DISPONÍVEIS (SUMÁRIO)
+           ========================================================================= */}
+        {!moduloSelecionado && !carregando && (
+          <>
+            {modulos.length === 0 || erro ? (
+              <div className="teoria-card estado-info">
+                <h3 style={{ color: '#64748b', margin: '0 0 8px 0' }}>📚 Trilhas em Construção</h3>
+                <p style={{ margin: 0 }}>Nenhum módulo ou capítulo teórico foi publicado para esta trilha ainda. Retorne mais tarde!</p>
+                <button className="btn-primary" onClick={onVoltar} style={{ marginTop: '16px', maxWidth: '150px' }}>Voltar</button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
+                <p style={{ textAlign: 'left', color: '#64748b', fontSize: '14px', margin: '0 0 6px 0' }}>
+                  Selecione um dos capítulos abaixo para iniciar seus estudos textuais e audiovisuais:
+                </p>
+                {modulos.map((mod, idx) => (
+                  <div 
+                    key={mod.id} 
+                    className="perfil-card" 
+                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', background: '#fff', cursor: 'pointer', transition: 'all 0.2s' }}
+                    onClick={() => handleCarregarModuloEspecifico(mod.id)}
+                  >
+                    <div style={{ textAlign: 'left' }}>
+                      <h4 style={{ margin: '0 0 4px 0', fontSize: '15px', fontWeight: 700, color: '#1e3a8a' }}>
+                        Capítulo {idx + 1}: {mod.titulo}
+                      </h4>
+                      <span style={{ fontSize: '12px', color: '#64748b' }}>
+                        {mod.blocos.length} seções intercaladas de conteúdo
+                      </span>
+                    </div>
+                    <button className="nav-btn" style={{ padding: '6px 14px', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', fontWeight: 600 }}>
+                      Acessar Aula
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
-        {aula && !carregando && (
+        {/* =========================================================================
+           ESTÁGIO 2: EXIBE O LEITOR DE BLOCOS INTERCALADOS DO MÓDULO SELECIONADO
+           ========================================================================= */}
+        {moduloSelecionado && !carregando && (
           <article className="teoria-card">
-            <h2 className="aula-titulo"><BookOpenIcon /> {aula.titulo}</h2>
+            <h2 className="aula-titulo"><BookOpenIcon /> {moduloSelecionado.titulo}</h2>
             
-            {/* PROCESSADOR DINÂMICO DE SEQUÊNCIA DE BLOCOS INTERCALADOS */}
             <div className="aula-corpo" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {aula.blocos && aula.blocos.map((bloco, idx) => {
+              {moduloSelecionado.blocos && moduloSelecionado.blocos.map((bloco, idx) => {
                 
-                // Renderização de blocos do tipo TEXTO
+                // Renderização estruturada de blocos do tipo TEXTO
                 if (bloco.tipo === 'texto') {
                   return (
-                    <div key={idx} style={{ color: '#334155', fontSize: '15px', lineheight: '1.7', textAlign: 'left' }}>
+                    <div key={idx} style={{ color: '#334155', fontSize: '15px', lineHeight: '1.7', textAlign: 'left' }}>
                       {bloco.valor.split('\n').map((p, i) => (
                         <p key={i} style={{ margin: '0 0 12px 0' }}>{p}</p>
                       ))}
@@ -78,27 +150,27 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar }) {
                   );
                 }
                 
-                // Renderização de blocos do tipo IMAGEM
+                // Renderização estruturada de blocos do tipo IMAGEM (Upload ou Links)
                 if (bloco.tipo === 'imagem') {
                   return (
                     <div key={idx} className="aula-imagem-box" style={{ margin: '10px 0', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
-                      <img src={bloco.valor} alt={`Elemento ilustrativo ${idx + 1}`} style={{ width: '100%', display: 'block' }} />
+                      <img src={bloco.valor} alt={`Elemento visual da lição ${idx + 1}`} style={{ width: '100%', display: 'block' }} />
                     </div>
                   );
                 }
                 
-                // Renderização de blocos do tipo VÍDEO
+                // Renderização estruturada de blocos do tipo VÍDEO
                 if (bloco.tipo === 'video') {
                   return (
                     <div key={idx} className="aula-video-section" style={{ margin: '10px 0', padding: '16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', textAlign: 'left' }}>
-                      <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#1e293b' }}>🎥 Recurso de Apoio Conectado</h4>
-                      <p style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#64748b' }}>Assista ao material de apoio sugerido pelo conteudista:</p>
+                      <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#1e293b' }}><FileTextIcon style={{ width: '16px', height: '16px', display: 'inline', verticalAlign: 'middle', marginRight: '6px' }} /> Recurso de Apoio Conectado</h4>
+                      <p style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#64748b' }}>Assista ao material complementar sugerido pelo conteudista:</p>
                       <a 
                         href={bloco.valor} 
                         target="_blank" 
                         rel="noopener noreferrer" 
                         className="btn-outline btn-video" 
-                        style={{ display: 'inline-flex', padding: '8px 16px', borderRadius: '6px', fontSize: '13px', textDecoration: 'none', color: '#1e3a8a', border: '1px solid #1e3a8a', background: '#fff' }}
+                        style={{ display: 'inline-flex', padding: '8px 16px', borderRadius: '6px', fontSize: '13px', textDecoration: 'none', color: '#1e3a8a', border: '1px solid #1e3a8a', background: '#fff', fontWeight: 600 }}
                       >
                         Abrir Link do Vídeo Auxiliar {idx + 1} ↗
                       </a>
@@ -111,7 +183,9 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar }) {
             </div>
 
             <div className="actions-row" style={{ marginTop: '30px' }}>
-              <button className="btn-primary" onClick={onVoltar} style={{ width: '100%' }}>Concluir Leitura e Voltar</button>
+              <button className="btn-primary" onClick={handleRetornarAoSumario} style={{ width: '100%' }}>
+                Concluir Capítulo e Voltar ao Sumário
+              </button>
             </div>
           </article>
         )}
