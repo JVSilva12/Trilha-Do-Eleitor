@@ -462,7 +462,7 @@ def upload_imagem_teoria(file: UploadFile = File(...)):
             shutil.copyfileobj(file.file, file_object)
             
         # CORREÇÃO: Inclusão explícita da porta :8000/ mapeada na rede localhost
-        return {"url_imagem": f"http://127.0.0{file_location}"}
+        return {"url_imagem": f"http://127.0.0.1:8000/{file_location}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
