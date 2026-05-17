@@ -6,6 +6,31 @@ import './VisualizarTeoria.css';
 // Definição global da URL Base para blindar requisições do Axios
 const API_URL = "http://127.0.0.1:8000";
 
+// Converte qualquer URL do YouTube ou Vimeo para URL de embed
+const getEmbedUrl = (url) => {
+  try {
+    // YouTube padrão: youtube.com/watch?v=ID
+    const ytMatch = url.match(/youtube\.com\/watch\?(?:.*&)?v=([\w-]+)/);
+    if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+
+    // YouTube curto: youtu.be/ID
+    const ytShortMatch = url.match(/youtu\.be\/([\w-]+)/);
+    if (ytShortMatch) return `https://www.youtube.com/embed/${ytShortMatch[1]}`;
+
+    // YouTube Shorts: youtube.com/shorts/ID
+    const ytShortsMatch = url.match(/youtube\.com\/shorts\/([\w-]+)/);
+    if (ytShortsMatch) return `https://www.youtube.com/embed/${ytShortsMatch[1]}`;
+
+    // Vimeo: vimeo.com/ID
+    const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+
+    return null; // URL não reconhecida — cai no fallback de link externo
+  } catch {
+    return null;
+  }
+};
+
 export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, emailUsuario }) {
   // Controle de estado para navegação interna de capítulos
   const [modulos, setModulos] = useState([]); // Guarda a lista de sumário das aulas
@@ -45,7 +70,7 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
     }
   };
 
-  // CORREÇÃO: Registra a conclusão do capítulo no banco antes de voltar para o sumário
+  // Registra a conclusão do capítulo no banco antes de voltar para o sumário
   const handleRetornarAoSumario = async () => {
     if (moduloSelecionado && moduloSelecionado.id && emailUsuario) {
       try {
@@ -65,9 +90,9 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
       <header className="teoria-header">
         <div className="header-left">
           {/* Se estiver lendo um módulo, volta pro sumário. Se estiver no sumário, volta pra home */}
-          <button 
-            className="icon-button" 
-            onClick={moduloSelecionado ? handleRetornarAoSumario : onVoltar} 
+          <button
+            className="icon-button"
+            onClick={moduloSelecionado ? handleRetornarAoSumario : onVoltar}
             title={moduloSelecionado ? "Voltar para o sumário" : "Voltar para as trilhas"}
           >
             <ArrowLeftIcon />
@@ -105,9 +130,9 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
                   Selecione um dos capítulos abaixo para iniciar seus estudos textuais e audiovisuais:
                 </p>
                 {modulos.map((mod, idx) => (
-                  <div 
-                    key={mod.id} 
-                    className="perfil-card" 
+                  <div
+                    key={mod.id}
+                    className="perfil-card"
                     style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', background: '#fff', cursor: 'pointer', transition: 'all 0.2s' }}
                     onClick={() => handleCarregarModuloEspecifico(mod.id)}
                   >
@@ -135,10 +160,10 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
         {moduloSelecionado && !carregando && (
           <article className="teoria-card">
             <h2 className="aula-titulo"><BookOpenIcon /> {moduloSelecionado.titulo}</h2>
-            
+
             <div className="aula-corpo" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {moduloSelecionado.blocos && moduloSelecionado.blocos.map((bloco, idx) => {
-                
+
                 // Renderização estruturada de blocos do tipo TEXTO
                 if (bloco.tipo === 'texto') {
                   return (
@@ -149,35 +174,55 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
                     </div>
                   );
                 }
-                
-                // Renderização estruturada de blocos do tipo IMAGEM (Upload ou Links)
+
                 if (bloco.tipo === 'imagem') {
                   return (
-                    <div key={idx} className="aula-imagem-box" style={{ margin: '10px 0', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
-                      <img src={bloco.valor} alt={`Elemento visual da lição ${idx + 1}`} style={{ width: '100%', display: 'block' }} />
+                    <div key={idx} className="aula-imagem-box" style={{ margin: '10px 0', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden', backgroundColor: '#f8fafc' }}>
+                      <img
+                        src={bloco.valor}
+                        alt={`Elemento visual da lição ${idx + 1}`}
+                        style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }}
+                      />
                     </div>
                   );
                 }
-                
-                // Renderização estruturada de blocos do tipo VÍDEO
+
                 if (bloco.tipo === 'video') {
+                  const embedUrl = getEmbedUrl(bloco.valor);
+
                   return (
-                    <div key={idx} className="aula-video-section" style={{ margin: '10px 0', padding: '16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', textAlign: 'left' }}>
-                      <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#1e293b' }}><FileTextIcon style={{ width: '16px', height: '16px', display: 'inline', verticalAlign: 'middle', marginRight: '6px' }} /> Recurso de Apoio Conectado</h4>
-                      <p style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#64748b' }}>Assista ao material complementar sugerido pelo conteudista:</p>
-                      <a 
-                        href={bloco.valor} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="btn-outline btn-video" 
-                        style={{ display: 'inline-flex', padding: '8px 16px', borderRadius: '6px', fontSize: '13px', textDecoration: 'none', color: '#1e3a8a', border: '1px solid #1e3a8a', background: '#fff', fontWeight: 600 }}
-                      >
-                        Abrir Link do Vídeo Auxiliar {idx + 1} ↗
-                      </a>
+                    <div key={idx} className="aula-video-section" style={{ margin: '10px 0', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
+                      {embedUrl ? (
+                        <iframe
+                          src={embedUrl}
+                          title={`Vídeo da aula ${idx + 1}`}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          style={{ width: '100%', aspectRatio: '16/9', display: 'block', border: 'none' }}
+                        />
+                      ) : (
+                        // Fallback para URLs não reconhecidas (não são YouTube nem Vimeo)
+                        <div style={{ padding: '16px', textAlign: 'left' }}>
+                          <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#1e293b' }}>
+                            <FileTextIcon style={{ width: '16px', height: '16px', display: 'inline', verticalAlign: 'middle', marginRight: '6px' }} />
+                            Recurso de Apoio Conectado
+                          </h4>
+                          <p style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#64748b' }}>Assista ao material complementar sugerido pelo conteudista:</p>
+                          <a
+                            href={bloco.valor}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn-outline btn-video"
+                            style={{ display: 'inline-flex', padding: '8px 16px', borderRadius: '6px', fontSize: '13px', textDecoration: 'none', color: '#1e3a8a', border: '1px solid #1e3a8a', background: '#fff', fontWeight: 600 }}
+                          >
+                            Abrir Link do Vídeo Auxiliar {idx + 1} ↗
+                          </a>
+                        </div>
+                      )}
                     </div>
                   );
                 }
-                
+
                 return null;
               })}
             </div>
