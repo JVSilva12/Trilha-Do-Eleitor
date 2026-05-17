@@ -26,7 +26,7 @@ function App() {
     if (!audio) return;
 
     audio.loop = true;
-    audio.volume = 0.5;
+    audio.volume = 0.70;
 
     audio.play().catch(() => {
       const iniciarNoClique = () => {
