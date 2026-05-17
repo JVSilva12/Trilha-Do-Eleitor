@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { ArrowLeftIcon, CheckIcon, TrashIcon } from './Icons'; // Reutiliza seus ícones
+import { ArrowLeftIcon, CheckIcon, TrashIcon } from './Icons';
 import './VisualizarQuiz.css';
+import somAplausos from './assets/aplausos.mp3';
 
 const API_URL = "http://127.0.0.1:8000";
 
@@ -30,6 +31,14 @@ export default function VisualizarQuiz({ trilhaId, trilhaNome, onVoltar }) {
     obterPerguntas();
   }, [trilhaId]);
 
+  useEffect(() => {
+    if (mostrarResultado && pontuacao === perguntas.length && perguntas.length > 0) {
+      const aplausos = new Audio(somAplausos);
+      aplausos.volume = 0.8;
+      aplausos.play().catch(() => {});
+    }
+  }, [mostrarResultado, pontuacao, perguntas.length]);
+
   const handleResponder = () => {
     if (!alternativaSelecionada || respondido) return;
 
@@ -43,7 +52,7 @@ export default function VisualizarQuiz({ trilhaId, trilhaNome, onVoltar }) {
   const handleProxima = () => {
     setAlternativaSelecionada(null);
     setRespondido(false);
-    
+
     if (indiceAtual + 1 < perguntas.length) {
       setIndiceAtual(indiceAtual + 1);
     } else {
@@ -111,7 +120,7 @@ export default function VisualizarQuiz({ trilhaId, trilhaNome, onVoltar }) {
               ].map((alt) => {
                 let classeBotao = "alternativa-btn";
                 if (alternativaSelecionada === alt.letra) classeBotao += " selecionada";
-                
+
                 if (respondido) {
                   if (alt.letra === questao.resposta_correta) {
                     classeBotao += " correta";
@@ -137,9 +146,9 @@ export default function VisualizarQuiz({ trilhaId, trilhaNome, onVoltar }) {
 
             <div className="actions-row" style={{ marginTop: '24px' }}>
               {!respondido ? (
-                <button 
-                  className="btn-primary" 
-                  disabled={!alternativaSelecionada} 
+                <button
+                  className="btn-primary"
+                  disabled={!alternativaSelecionada}
                   onClick={handleResponder}
                   style={{ width: '100%', background: !alternativaSelecionada ? '#94a3b8' : '#1e3a8a' }}
                 >
@@ -156,7 +165,7 @@ export default function VisualizarQuiz({ trilhaId, trilhaNome, onVoltar }) {
           <div className="quiz-card resultado-card">
             <h2>🎉 Questionário Concluído!</h2>
             <p>Você completou a avaliação de fixação da trilha.</p>
-            
+
             <div className="score-box">
               <span className="score-num">{pontuacao} / {perguntas.length}</span>
               <span className="score-text">Respostas Corretas</span>

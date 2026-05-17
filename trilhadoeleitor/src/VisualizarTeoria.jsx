@@ -1,44 +1,128 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { ArrowLeftIcon, BookOpenIcon, FileTextIcon } from './Icons';
 import './VisualizarTeoria.css';
 
-// Definição global da URL Base para blindar requisições do Axios
 const API_URL = "http://127.0.0.1:8000";
 
-// Converte qualquer URL do YouTube ou Vimeo para URL de embed
+// Converte qualquer URL do YouTube ou Vimeo para URL de embed.
+// Para YouTube, adiciona ?enablejsapi=1 para detecção de eventos via postMessage.
 const getEmbedUrl = (url) => {
   try {
-    // YouTube padrão: youtube.com/watch?v=ID
     const ytMatch = url.match(/youtube\.com\/watch\?(?:.*&)?v=([\w-]+)/);
-    if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+    if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}?enablejsapi=1`;
 
-    // YouTube curto: youtu.be/ID
     const ytShortMatch = url.match(/youtu\.be\/([\w-]+)/);
-    if (ytShortMatch) return `https://www.youtube.com/embed/${ytShortMatch[1]}`;
+    if (ytShortMatch) return `https://www.youtube.com/embed/${ytShortMatch[1]}?enablejsapi=1`;
 
-    // YouTube Shorts: youtube.com/shorts/ID
     const ytShortsMatch = url.match(/youtube\.com\/shorts\/([\w-]+)/);
-    if (ytShortsMatch) return `https://www.youtube.com/embed/${ytShortsMatch[1]}`;
+    if (ytShortsMatch) return `https://www.youtube.com/embed/${ytShortsMatch[1]}?enablejsapi=1`;
 
-    // Vimeo: vimeo.com/ID
     const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
     if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
 
-    return null; // URL não reconhecida — cai no fallback de link externo
+    return null;
   } catch {
     return null;
   }
 };
 
-export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, emailUsuario }) {
-  // Controle de estado para navegação interna de capítulos
-  const [modulos, setModulos] = useState([]); // Guarda a lista de sumário das aulas
-  const [moduloSelecionado, setModuloSelecionado] = useState(null); // Guarda a aula aberta no momento
+function VideoComControleAudio({ src, titulo, audioFundo, pausadoPorVideo }) {
+  const [overlayAtivo, setOverlayAtivo] = useState(true);
+
+  const handleCliqueNoOverlay = () => {
+    const audio = audioFundo?.current;
+    if (audio && !audio.paused) {
+      audio.pause();
+      pausadoPorVideo.current = true;
+    }
+    // Remove o overlay para liberar os controles do player
+    setOverlayAtivo(false);
+  };
+
+  // Reativa o overlay se o usuário pausar o vídeo (via postMessage do YouTube)
+  // para garantir que um novo clique de play seja interceptado novamente
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (!event.origin.includes('youtube.com')) return;
+      try {
+        const data = JSON.parse(event.data);
+        // playerState 2 = pausado, 0 = encerrado → reativa o overlay
+        if (data.info?.playerState === 2 || data.info?.playerState === 0) {
+          setOverlayAtivo(true);
+          const audio = audioFundo?.current;
+          if (audio && pausadoPorVideo.current) {
+            audio.play().catch(() => {});
+            pausadoPorVideo.current = false;
+          }
+        }
+      } catch { /* ignora mensagens não-JSON */ }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [audioFundo, pausadoPorVideo]);
+
+  return (
+    <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9' }}>
+      <iframe
+        src={src}
+        title={titulo}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        style={{ width: '100%', height: '100%', display: 'block', border: 'none' }}
+      />
+      {/* Overlay invisível que captura o clique antes do vídeo tocar */}
+      {overlayAtivo && (
+        <div
+          onClick={handleCliqueNoOverlay}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 10,
+            cursor: 'pointer',
+            background: 'transparent',
+          }}
+          title="Clique para reproduzir o vídeo"
+        />
+      )}
+    </div>
+  );
+}
+
+export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, emailUsuario, audioFundo }) {
+  const [modulos, setModulos] = useState([]);
+  const [moduloSelecionado, setModuloSelecionado] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(false);
 
-  // Efeito 1: Busca o sumário completo de capítulos associados a esta trilha no banco
+  // Flag compartilhada entre os componentes de vídeo e os listeners globais
+  const pausadoPorVideo = useRef(false);
+
+  // Retoma a música ao sair da tela de teoria (via window.focus para Vimeo)
+  useEffect(() => {
+    const handleWindowFocus = () => {
+      const audio = audioFundo?.current;
+      if (audio && pausadoPorVideo.current) {
+        audio.play().catch(() => {});
+        pausadoPorVideo.current = false;
+      }
+    };
+
+    window.addEventListener('focus', handleWindowFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleWindowFocus);
+      // Garante que a música retoma ao desmontar (navegar para outra tela)
+      const audio = audioFundo?.current;
+      if (audio && pausadoPorVideo.current) {
+        audio.play().catch(() => {});
+        pausadoPorVideo.current = false;
+      }
+    };
+  }, [audioFundo]);
+
+  // Busca o sumário de módulos da trilha
   useEffect(() => {
     async function obterListaModulos() {
       if (!trilhaId) return;
@@ -57,7 +141,6 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
     obterListaModulos();
   }, [trilhaId]);
 
-  // Efeito 2: Carrega a sequência de blocos de mídias do capítulo que o aluno clicou
   const handleCarregarModuloEspecifico = async (moduloId) => {
     try {
       setCarregando(true);
@@ -70,17 +153,14 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
     }
   };
 
-  // Registra a conclusão do capítulo no banco antes de voltar para o sumário
   const handleRetornarAoSumario = async () => {
     if (moduloSelecionado && moduloSelecionado.id && emailUsuario) {
       try {
-        // Dispara a rota do FastAPI para computar a leitura do módulo atual
         await axios.post(`${API_URL}/trilhas/${trilhaId}/concluir-modulo/${moduloSelecionado.id}?email=${emailUsuario}`);
       } catch (err) {
         console.error("Erro ao registrar conclusão do módulo no backend:", err);
       }
     }
-    // Reseta o estado para voltar a exibir o menu do sumário
     setModuloSelecionado(null);
     setCarregando(false);
   };
@@ -89,7 +169,6 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
     <div className="teoria-page">
       <header className="teoria-header">
         <div className="header-left">
-          {/* Se estiver lendo um módulo, volta pro sumário. Se estiver no sumário, volta pra home */}
           <button
             className="icon-button"
             onClick={moduloSelecionado ? handleRetornarAoSumario : onVoltar}
@@ -113,9 +192,7 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
           </div>
         )}
 
-        {/* =========================================================================
-           ESTÁGIO 1: EXIBE A LISTA DE CAPÍTULOS DISPONÍVEIS (SUMÁRIO)
-           ========================================================================= */}
+        {/* ESTÁGIO 1: SUMÁRIO DE CAPÍTULOS */}
         {!moduloSelecionado && !carregando && (
           <>
             {modulos.length === 0 || erro ? (
@@ -154,9 +231,7 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
           </>
         )}
 
-        {/* =========================================================================
-           ESTÁGIO 2: EXIBE O LEITOR DE BLOCOS INTERCALADOS DO MÓDULO SELECIONADO
-           ========================================================================= */}
+        {/* ESTÁGIO 2: LEITOR DE BLOCOS DO MÓDULO */}
         {moduloSelecionado && !carregando && (
           <article className="teoria-card">
             <h2 className="aula-titulo"><BookOpenIcon /> {moduloSelecionado.titulo}</h2>
@@ -164,7 +239,6 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
             <div className="aula-corpo" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {moduloSelecionado.blocos && moduloSelecionado.blocos.map((bloco, idx) => {
 
-                // Renderização estruturada de blocos do tipo TEXTO
                 if (bloco.tipo === 'texto') {
                   return (
                     <div key={idx} style={{ color: '#334155', fontSize: '15px', lineHeight: '1.7', textAlign: 'left' }}>
@@ -193,15 +267,13 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
                   return (
                     <div key={idx} className="aula-video-section" style={{ margin: '10px 0', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
                       {embedUrl ? (
-                        <iframe
+                        <VideoComControleAudio
                           src={embedUrl}
-                          title={`Vídeo da aula ${idx + 1}`}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                          style={{ width: '100%', aspectRatio: '16/9', display: 'block', border: 'none' }}
+                          titulo={`Vídeo da aula ${idx + 1}`}
+                          audioFundo={audioFundo}
+                          pausadoPorVideo={pausadoPorVideo}
                         />
                       ) : (
-                        // Fallback para URLs não reconhecidas (não são YouTube nem Vimeo)
                         <div style={{ padding: '16px', textAlign: 'left' }}>
                           <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', color: '#1e293b' }}>
                             <FileTextIcon style={{ width: '16px', height: '16px', display: 'inline', verticalAlign: 'middle', marginRight: '6px' }} />

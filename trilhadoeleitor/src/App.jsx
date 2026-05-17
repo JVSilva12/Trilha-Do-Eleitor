@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './App.css';
 import Login from './Login';
 import Cadastro from './Cadastro';
@@ -9,6 +9,8 @@ import NovaTrilha from './pages/conteudista/NovaTrilha.jsx';
 import PainelConteudista from './PainelConteudista';
 import VisualizarTeoria from './VisualizarTeoria';
 import VisualizarQuiz from './VisualizarQuiz';
+import musicaFundo from './assets/MorningRoutine.mp3';
+import somClique from './assets/clique.mp3';
 
 function App() {
   // Controle de estado centralizado para segurança e navegação direta
@@ -17,49 +19,82 @@ function App() {
   const [trilhaIdEdicao, setTrilhaIdEdicao] = useState(null);
   const [trilhaVisualizacao, setTrilhaVisualizacao] = useState({ id: null, nome: '' });
 
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.loop = true;
+    audio.volume = 0.5;
+
+    audio.play().catch(() => {
+      const iniciarNoClique = () => {
+        audio.play().catch(() => {});
+        document.removeEventListener('click', iniciarNoClique);
+      };
+      document.addEventListener('click', iniciarNoClique);
+    });
+
+    return () => {
+      document.removeEventListener('click', () => {});
+    };
+  }, []);
+
+  const navegarPara = (novaTela) => {
+    const clique = new Audio(somClique);
+    clique.volume = 0.20;
+    clique.play().catch(() => {});
+    setTela(novaTela);
+  };
+
   const handleLoginSucesso = (email) => {
     setEmailLogado(email);
-    setTela('home');
+    navegarPara('home');
   };
 
   const handleLogout = () => {
     setEmailLogado('');
-    setTela('login');
+    navegarPara('login');
   };
 
   const handleAbrirEdicao = (id) => {
     setTrilhaIdEdicao(id);
-    setTela('painel');
+    navegarPara('painel');
   };
 
   const handleAbrirTeoriaAluno = (id, nome) => {
     setTrilhaVisualizacao({ id, nome });
-    setTela('ver-teoria');
+    navegarPara('ver-teoria');
   };
 
   const handleAbrirQuizAluno = (id, nome) => {
     setTrilhaVisualizacao({ id, nome });
-    setTela('ver-quiz');
+    navegarPara('ver-quiz');
   };
 
   return (
     <div className="App">
+
+      {/* Elemento de áudio oculto — gerenciado pelo useRef acima */}
+      <audio ref={audioRef} src={musicaFundo} preload="auto" style={{ display: 'none' }} />
+
       {/* Fluxo de Autenticação */}
       {tela === 'login' && (
-        <Login onLoginSucesso={handleLoginSucesso} onSwitch={() => setTela('cadastro')} />
+        <Login onLoginSucesso={handleLoginSucesso} onSwitch={() => navegarPara('cadastro')} />
       )}
-      
+
       {tela === 'cadastro' && (
-        <Cadastro onSwitch={() => setTela('login')} />
+        <Cadastro onSwitch={() => navegarPara('login')} />
       )}
 
       {/* Home Page Principal do Aluno e Eleitor */}
       {tela === 'home' && (
-        <Trilhas 
-          emailUsuario={emailLogado} 
-          onLogout={handleLogout} 
-          onIrParaPerfil={() => setTela('perfil')} 
-          onIrParaPainel={() => setTela('gerenciar-trilhas')} 
+        <Trilhas
+          emailUsuario={emailLogado}
+          onLogout={handleLogout}
+          onIrParaPerfil={() => navegarPara('perfil')}
+          onIrParaPainel={() => navegarPara('gerenciar-trilhas')}
           onVisualizarTeoria={handleAbrirTeoriaAluno}
           onVisualizarQuiz={handleAbrirQuizAluno}
         />
@@ -67,36 +102,39 @@ function App() {
 
       {/* Edição de Dados Cadastrais do Usuário */}
       {tela === 'perfil' && (
-        <EditarPerfil emailUsuario={emailLogado} onVoltar={() => setTela('home')} />
+        <EditarPerfil emailUsuario={emailLogado} onVoltar={() => navegarPara('home')} />
       )}
 
       {/* Repositório de Gerenciamento Geral do Conteudista */}
       {tela === 'gerenciar-trilhas' && (
-        <GerenciarTrilhas 
-          emailUsuario={emailLogado} 
-          onVoltar={() => setTela('home')} 
-          onIrParaNovaTrilha={() => setTela('nova-trilha')} 
-          onEditarTrilha={handleAbrirEdicao} 
+        <GerenciarTrilhas
+          emailUsuario={emailLogado}
+          onVoltar={() => navegarPara('home')}
+          onIrParaNovaTrilha={() => navegarPara('nova-trilha')}
+          onEditarTrilha={handleAbrirEdicao}
         />
       )}
 
       {/* Formulário de Estrutura Inicial de Novas Trilhas */}
       {tela === 'nova-trilha' && (
-        <NovaTrilha onVoltar={() => setTela('gerenciar-trilhas')} />
+        <NovaTrilha onVoltar={() => navegarPara('gerenciar-trilhas')} />
       )}
 
       {/* Painel de Incrementação de Conteúdo do Conteudista (Lápis) */}
       {tela === 'painel' && (
-        <PainelConteudista trilhaId={trilhaIdEdicao} onVoltar={() => setTela('gerenciar-trilhas')} />
+        <PainelConteudista trilhaId={trilhaIdEdicao} onVoltar={() => navegarPara('gerenciar-trilhas')} />
       )}
 
-      {/* Visualização de Aula Teórica Dinâmica com Trava de Progresso */}
+      {/* Visualização de Aula Teórica Dinâmica com Trava de Progresso
+          audioRef é passado para que VisualizarTeoria pause/retome a música
+          conforme o usuário interage com os vídeos embutidos. */}
       {tela === 'ver-teoria' && (
-        <VisualizarTeoria 
-          trilhaId={trilhaVisualizacao.id} 
-          trilhaNome={trilhaVisualizacao.nome} 
-          emailUsuario={emailLogado} // ATUALIZAÇÃO CRUCIAL: Passa o e-mail para computar o progresso relacional
-          onVoltar={() => setTela('home')} 
+        <VisualizarTeoria
+          trilhaId={trilhaVisualizacao.id}
+          trilhaNome={trilhaVisualizacao.nome}
+          emailUsuario={emailLogado}
+          audioFundo={audioRef}
+          onVoltar={() => navegarPara('home')}
         />
       )}
 
@@ -105,7 +143,7 @@ function App() {
         <VisualizarQuiz
           trilhaId={trilhaVisualizacao.id}
           trilhaNome={trilhaVisualizacao.nome}
-          onVoltar={() => setTela('home')}
+          onVoltar={() => navegarPara('home')}
         />
       )}
     </div>
