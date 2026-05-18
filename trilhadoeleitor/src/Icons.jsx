@@ -86,3 +86,44 @@ export const CheckIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
   </svg>
 );
+// --- ÍCONES DO SIMULADOR DE URNA ---
+
+// Bandeira do Brasil fiel — verde, losango amarelo, círculo azul, faixa branca (sem estrelas, sem texto)
+export const EleicaoGeraisIcon = ({ size = 48 }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="-2100 -1470 4200 2940">
+    <defs>
+      <clipPath id="urna-flag-clip"><circle r="735"/></clipPath>
+    </defs>
+    {/* Fundo verde */}
+    <path d="m-2100-1470h4200v2940h-4200z" fill="#009C3B"/>
+    {/* Losango amarelo */}
+    <path d="M-1743,0 0,1113 1743,0 0,-1113Z" fill="#FFDF00"/>
+    {/* Círculo azul */}
+    <circle r="735" fill="#002776"/>
+    {/* Faixa branca curva — clippada no círculo */}
+    <path
+      d="m-2205 1470a1785 1785 0 0 1 3570 0h-105a1680 1680 0 1 0-3360 0z"
+      clipPath="url(#urna-flag-clip)"
+      fill="#fff"
+    />
+  </svg>
+);
+
+// Pin de localização estilo Google Maps — Eleições Municipais
+export const EleicaoMunicipalIcon = ({ size = 48, color = 'currentColor' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 48 48" fill="none">
+    {/* Corpo do pin */}
+    <path
+      d="M24 4 C16.268 4 10 10.268 10 18 C10 28 24 44 24 44 C24 44 38 28 38 18 C38 10.268 31.732 4 24 4Z"
+      fill={color}
+      fillOpacity="0.2"
+      stroke={color}
+      strokeWidth="2.2"
+      strokeLinejoin="round"
+    />
+    {/* Círculo interno */}
+    <circle cx="24" cy="18" r="6" fill={color} fillOpacity="0.9" stroke={color} strokeWidth="1.5"/>
+    {/* Reflexo */}
+    <circle cx="21" cy="15" r="2" fill="white" fillOpacity="0.45"/>
+  </svg>
+);
