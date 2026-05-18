@@ -6,17 +6,15 @@ import fotoProcesso from './assets/processo.png';
 import fotoFakeNews from './assets/fakenews.png'; 
 import './Trilhas.css';
 
-// Definição global da URL Base para blindar requisições do Axios
 const API_URL = "http://127.0.0.1:8000";
 
-export default function Trilhas({ emailUsuario, onLogout, onIrParaPerfil, onIrParaPainel, onVisualizarTeoria, onVisualizarQuiz }) {
+export default function Trilhas({ emailUsuario, onLogout, onIrParaPerfil, onIrParaPainel, onVisualizarTeoria, onVisualizarQuiz, onVisualizarPratica }) {
   const [fotoPerfil, setFotoPerfil] = useState(null);
   const [apelido, setApelido] = useState('');
   const [inscricoes, setInscricoes] = useState([]); 
   const [trilhasBanco, setTrilhasBanco] = useState([]); 
   const [tipoUsuario, setTipoUsuario] = useState('leitor'); 
 
-  // Mapeador dinâmico para resolver os assets locais ou strings de URL externas
   const mapearImagemTrilha = (imagemInformada) => {
     if (imagemInformada === 'urna') return fotoUrna;
     if (imagemInformada === 'processo') return fotoProcesso;
@@ -30,7 +28,6 @@ export default function Trilhas({ emailUsuario, onLogout, onIrParaPerfil, onIrPa
   const carregarDadosDoServidor = useCallback(async () => {
     if (!emailUsuario) return;
     try {
-      // 1. Sincroniza dados cadastrais e cargos de acesso
       const resPerfil = await axios.get(`${API_URL}/perfil/${emailUsuario}`);
       setApelido(resPerfil.data.apelido);
       setTipoUsuario(resPerfil.data.tipo_usuario || 'leitor');
@@ -41,12 +38,10 @@ export default function Trilhas({ emailUsuario, onLogout, onIrParaPerfil, onIrPa
         setFotoPerfil(null);
       }
       
-      // 2. Busca o acervo pedagógico real gravado no SQLite
       const resTrilhas = await axios.get(`${API_URL}/trilhas`);
       const apenasPublicadas = resTrilhas.data.filter(t => t.status === 'publicada');
       setTrilhasBanco(apenasPublicadas);
       
-      // 3. Captura o vínculo de inscrições ativas do estudante
       const resInscricoes = await axios.get(`${API_URL}/inscricoes/${emailUsuario}`);
       setInscricoes(resInscricoes.data);
     } catch (error) { 
@@ -136,7 +131,6 @@ export default function Trilhas({ emailUsuario, onLogout, onIrParaPerfil, onIrPa
             const estaInscrito = inscricoes.includes(trilha.id);
             const imagemResolvida = mapearImagemTrilha(trilha.imagem);
 
-            // COMPONENTE INTERNO DE CARD DINÂMICO REATIVO PARA GESTÃO INDEPENDENTE DE PROGRESSO
             return (
               <TrilhaCardItem 
                 key={trilha.id}
@@ -146,6 +140,7 @@ export default function Trilhas({ emailUsuario, onLogout, onIrParaPerfil, onIrPa
                 emailUsuario={emailUsuario}
                 onVisualizarTeoria={onVisualizarTeoria}
                 onVisualizarQuiz={onVisualizarQuiz}
+                onVisualizarPratica={onVisualizarPratica}
                 handleInscrever={handleInscrever}
               />
             );
@@ -156,11 +151,9 @@ export default function Trilhas({ emailUsuario, onLogout, onIrParaPerfil, onIrPa
   );
 }
 
-// SUB-COMPONENTE INTERNO PARA ISOLAR A BUSCA DE PROGRESSO DE CADA CARD EVITANDO CONFLITOS DE ESTADO
-function TrilhaCardItem({ trilha, estaInscrito, imagemResolvida, emailUsuario, onVisualizarTeoria, onVisualizarQuiz, handleInscrever }) {
+function TrilhaCardItem({ trilha, estaInscrito, imagemResolvida, emailUsuario, onVisualizarTeoria, onVisualizarQuiz, onVisualizarPratica, handleInscrever }) {
   const [progressoDados, setProgressoDados] = useState({ porridge: 0, liberado_quiz: false });
 
-  // Dispara a chamada ao endpoint de progresso dinâmico apenas se o aluno for matriculado na trilha
   useEffect(() => {
     if (estaInscrito && emailUsuario) {
       axios.get(`${API_URL}/trilhas/${trilha.id}/progresso/${emailUsuario}`)
@@ -168,6 +161,8 @@ function TrilhaCardItem({ trilha, estaInscrito, imagemResolvida, emailUsuario, o
         .catch(err => console.error("Erro ao computar barra de progresso:", err));
     }
   }, [estaInscrito, trilha.id, emailUsuario]);
+
+  const ehTrilhaUrna = trilha.imagem === 'urna';
 
   return (
     <div className="trilha-card">
@@ -189,7 +184,7 @@ function TrilhaCardItem({ trilha, estaInscrito, imagemResolvida, emailUsuario, o
           </span>
         </div>
 
-        {/* ESTRUTURA VISUAL DA BARRA DE PROGRESSO EM TEMPO REAL */}
+        {/* BARRA DE PROGRESSO */}
         {estaInscrito && (
           <div style={{ marginBottom: '18px', textAlign: 'left' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 'bold', color: '#64748b', marginBottom: '4px' }}>
@@ -218,7 +213,7 @@ function TrilhaCardItem({ trilha, estaInscrito, imagemResolvida, emailUsuario, o
               Teoria
             </button>
             
-            {/* TRAVA PEDAGÓGICA BLINDADA DO QUIZ COM CADEADO E AVISO MANIPULADO */}
+            {/* TRAVA PEDAGÓGICA DO QUIZ */}
             <button 
               className="action-btn" 
               onClick={() => {
@@ -237,7 +232,24 @@ function TrilhaCardItem({ trilha, estaInscrito, imagemResolvida, emailUsuario, o
               {progressoDados.liberado_quiz ? "Quiz" : "🔒 Quiz"}
             </button>
             
-            <button className="action-btn" onClick={() => alert("Módulo Prático em desenvolvimento")}>Prática</button>
+            {/* BOTÃO PRÁTICA — abre o simulador apenas na trilha da urna */}
+            {ehTrilhaUrna ? (
+              <button
+                className="action-btn"
+                onClick={() => onVisualizarPratica(trilha.id, trilha.nome)}
+                style={{ background: '#d1fae5', color: '#065f46' }}
+              >
+                Prática
+              </button>
+            ) : (
+              <button
+                className="action-btn"
+                onClick={() => alert("Módulo Prático em desenvolvimento")}
+                style={{ background: '#94a3b8', cursor: 'not-allowed', opacity: 0.7 }}
+              >
+                Prática
+              </button>
+            )}
           </div>
         ) : (
           <button className="btn-inscrever" onClick={() => handleInscrever(trilha)}>
