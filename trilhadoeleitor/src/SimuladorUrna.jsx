@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowLeftIcon, CheckIcon, EleicaoGeraisIcon, EleicaoMunicipalIcon } from './Icons';
+import { getCandidatos } from './candidatos';
 import brasaoImg from './assets/Brasil.png';
 import somUrna from './assets/urna.mp3';
 import './SimuladorUrna.css';
@@ -74,6 +75,9 @@ export default function SimuladorUrna({ onVoltar }) {
   const [estado, setEstado] = useState(INICIAL);
   const [barraProgresso, setBarraProgresso] = useState(0);
   const [subFase, setSubFase] = useState('barra');
+  const [folhetoAberto, setFolhetoAberto] = useState(false);
+  const [dragStartY, setDragStartY] = useState(null);
+  const [dragging, setDragging] = useState(false);
   const hora = useRelogio();
   const barraRef = useRef(null);
 
@@ -106,7 +110,7 @@ export default function SimuladorUrna({ onVoltar }) {
         // Barra completa → mostra FIM e toca o som
         setSubFase('fim');
         const audio = new Audio(somUrna);
-        audio.volume = 1.0;
+        audio.volume = 0.75;
         audio.play().catch(() => {});
         // Após 2.5s exibindo FIM, vai para tela de resumo
         setTimeout(() => {
@@ -156,11 +160,23 @@ export default function SimuladorUrna({ onVoltar }) {
       // CONFIRMA
       if (tecla === 'CONFIRMA') {
         if (prev.fase !== 'confirmar') return prev;
-        const voto = prev.branco ? 'BRANCO' : prev.digitos.join('');
+        let voto;
+        if (prev.branco) {
+          voto = 'BRANCO';
+        } else {
+          const candidatos = getCandidatos(c.id, turno, tipoEleicao);
+          const numero = prev.digitos.join('');
+          const candidatoValido = !!candidatos[numero];
+          // Bloqueia senador duplicado: se senador_2 votou no mesmo número que senador_1
+          const senadorDuplicado =
+            c.id === 'senador_2' &&
+            prev.votos['senador_1'] === numero &&
+            prev.votos['senador_1'] !== 'NULO' &&
+            prev.votos['senador_1'] !== 'BRANCO';
+          voto = (candidatoValido && !senadorDuplicado) ? numero : 'NULO';
+        }
         const novosVotos = { ...prev.votos, [c.id]: voto };
         const proximo = prev.cargoIdx + 1;
-
-        // Último cargo (presidente) → vai para 'encerrando' em vez de 'fim' direto
         if (proximo >= CARGOS.length) {
           return { ...INICIAL, fase: 'encerrando', votos: novosVotos, cargoIdx: prev.cargoIdx };
         }
@@ -176,7 +192,7 @@ export default function SimuladorUrna({ onVoltar }) {
 
       return prev;
     });
-  }, [CARGOS]);
+  }, [CARGOS, turno, tipoEleicao]);
   useEffect(() => {
     const fn = (e) => {
       if (e.key >= '0' && e.key <= '9') pressionar(e.key);
@@ -218,7 +234,7 @@ export default function SimuladorUrna({ onVoltar }) {
                 style={{ width: `${barraProgresso}%` }}
               />
             </div>
-            <div className="display-processando">PROCESSANDO...</div>
+            <div className="display-processando">GRAVANDO</div>
           </div>
         );
       }
@@ -252,15 +268,40 @@ export default function SimuladorUrna({ onVoltar }) {
 
     // Número completo aguardando confirmação
     if (estado.fase === 'confirmar') {
+      const candidatosConf = getCandidatos(c.id, turno, tipoEleicao);
+      const numero = estado.digitos.join('');
+      const candidatoConf = candidatosConf[numero] || null;
+      const senadorDuplicado =
+        c.id === 'senador_2' &&
+        estado.votos['senador_1'] === numero &&
+        estado.votos['senador_1'] !== 'NULO' &&
+        estado.votos['senador_1'] !== 'BRANCO';
+      const seraVotoNulo = !candidatoConf || senadorDuplicado;
+
       return (
         <div className="display-conteudo" style={{ alignItems: 'flex-start', justifyContent: 'flex-start' }}>
           <div className="display-cargo">{c.nome}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-            <span style={{ fontSize: '12px', color: '#333' }}>Número:</span>
-            <span className="display-numero-confirmacao" style={{ fontSize: '36px', letterSpacing: '6px', margin: 0 }}>
-              {estado.digitos.join('')}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+            <span style={{ fontSize: '11px', color: '#555' }}>Número:</span>
+            <span className="display-numero-confirmacao" style={{ fontSize: '32px', letterSpacing: '6px', margin: 0 }}>
+              {numero}
             </span>
           </div>
+          {seraVotoNulo ? (
+            <div style={{ marginBottom: '8px' }}>
+              <div style={{ fontSize: '15px', fontWeight: '900', color: '#111', letterSpacing: '0.1em' }}>VOTO NULO</div>
+              <div style={{ fontSize: '10px', color: '#555', marginTop: '2px' }}>
+                {senadorDuplicado
+                  ? 'Candidato já escolhido no 1º voto para senador'
+                  : 'Número não corresponde a nenhum candidato'}
+              </div>
+            </div>
+          ) : (
+            <div style={{ marginBottom: '8px' }}>
+              <div style={{ fontSize: '14px', fontWeight: '700', color: '#111' }}>{candidatoConf.nome}</div>
+              <div style={{ fontSize: '11px', color: '#555', marginTop: '2px' }}>{candidatoConf.partido}</div>
+            </div>
+          )}
           <div className="display-instrucao">
             Aperte a tecla:<br />
             <b>CONFIRMA</b> para confirmar seu voto<br />
@@ -271,6 +312,10 @@ export default function SimuladorUrna({ onVoltar }) {
     }
 
     // Digitando
+    const candidatos = getCandidatos(c.id, turno, tipoEleicao);
+    const numeroDigitado = estado.digitos.join('');
+    const candidatoAtual = candidatos[numeroDigitado] || null;
+
     return (
       <div className="display-conteudo" style={{ alignItems: 'flex-start', justifyContent: 'flex-start' }}>
         <div className="display-cargo">{c.nome}</div>
@@ -288,7 +333,24 @@ export default function SimuladorUrna({ onVoltar }) {
             );
           })}
         </div>
-
+        {estado.digitos.length > 0 && (
+          <div style={{ marginTop: '10px', minHeight: '36px' }}>
+            {candidatoAtual ? (
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: '#111' }}>
+                  {candidatoAtual.nome}
+                </div>
+                <div style={{ fontSize: '11px', color: '#555', marginTop: '2px' }}>
+                  {candidatoAtual.partido}
+                </div>
+              </div>
+            ) : (
+              estado.digitos.length < c.digitos
+                ? <div style={{ fontSize: '11px', color: '#888', fontStyle: 'italic' }}>Digitando...</div>
+                : null
+            )}
+          </div>
+        )}
       </div>
     );
   };
@@ -303,7 +365,7 @@ export default function SimuladorUrna({ onVoltar }) {
       <div className="urna-page">
         <div className="urna-voltar-row">
           <button className="icon-button" onClick={onVoltar}>
-            <ArrowLeftIcon /><span>Voltar</span>
+            <ArrowLeftIcon /><span>Sair</span>
           </button>
         </div>
         <div className="urna-selecao-card">
@@ -349,7 +411,7 @@ export default function SimuladorUrna({ onVoltar }) {
       <div className="urna-page">
         <div className="urna-voltar-row">
           <button className="icon-button" onClick={() => setTipoEleicao(null)}>
-            <ArrowLeftIcon /><span>Voltar</span>
+            <ArrowLeftIcon /><span>Sair</span>
           </button>
         </div>
         <div className="urna-selecao-card">
@@ -393,45 +455,141 @@ export default function SimuladorUrna({ onVoltar }) {
   // TELA FINAL (resumo dos votos)
   // =========================================================================
   if (estado.fase === 'fim') {
-    return (
-      <div className="urna-page">
-        <div className="urna-voltar-row">
-          <button className="icon-button" onClick={onVoltar}>
-            <ArrowLeftIcon /><span>Voltar</span>
-          </button>
-        </div>
-        <div className="urna-fim-card">
-          <div className="urna-fim-icon">
-            <CheckIcon style={{ width: 52, height: 52, color: '#16a34a', strokeWidth: 2 }} />
-          </div>
-          <h2>Votação Encerrada</h2>
-          <p>Sua participação foi registrada com sucesso. Obrigado por votar!</p>
-          <div className="urna-fim-resumo">
-            {CARGOS.map((c) => (
-              <div key={c.id} className="urna-fim-linha">
-                <span className="urna-fim-cargo">{c.nome}</span>
-                <span className="urna-fim-numero">{estado.votos[c.id] || '—'}</span>
-              </div>
-            ))}
-          </div>
-          <button className="urna-btn-reiniciar" onClick={() => { setBarraProgresso(0); setEstado(INICIAL); setTurno(null); setTipoEleicao(null); }}>
-            Votar Novamente
-          </button>
-        </div>
+  const totalCargos = CARGOS.length;
+  const especiais = CARGOS.filter(c => {
+    const v = estado.votos[c.id];
+    return v === 'BRANCO' || v === 'NULO';
+  }).length;
+  const validos = totalCargos - especiais;
+
+  return (
+    <div className="urna-page urna-fim-page">
+      <div className="urna-voltar-row">
+        <button className="icon-button" onClick={onVoltar}>
+          <ArrowLeftIcon /><span>Sair</span>
+        </button>
       </div>
-    );
-  }
+
+      <div className="urna-fim-card">
+        {/* Cabeçalho */}
+        <div className="urna-fim-hero">
+          <div className="urna-fim-check-ring">
+            <CheckIcon style={{ width: 38, height: 38, color: '#fff', strokeWidth: 3 }} />
+          </div>
+          <h2 className="urna-fim-titulo">Votação Encerrada</h2>
+
+          <div className="urna-fim-stats">
+            <div className="urna-fim-stat">
+              <span className="urna-fim-stat-num">{totalCargos}</span>
+              <span className="urna-fim-stat-label">Cargos</span>
+            </div>
+            <div className="urna-fim-stat urna-fim-stat-ok">
+              <span className="urna-fim-stat-num">{validos}</span>
+              <span className="urna-fim-stat-label">Válidos</span>
+            </div>
+            <div className="urna-fim-stat urna-fim-stat-warn">
+              <span className="urna-fim-stat-num">{especiais}</span>
+              <span className="urna-fim-stat-label">Branco / Nulo</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Lista de votos */}
+        <div className="urna-fim-lista">
+          {CARGOS.map((c, idx) => {
+            const voto = estado.votos[c.id] || '—';
+            const candidatos = getCandidatos(c.id, turno, tipoEleicao);
+            const candidato = candidatos[voto];
+            const isBranco = voto === 'BRANCO';
+            const isNulo = voto === 'NULO';
+            const isEspecial = isBranco || isNulo || voto === '—';
+
+            const modifier = isBranco ? 'branco' : isNulo ? 'nulo' : 'valido';
+
+            return (
+              <article
+                key={`${c.id}-${idx}`}
+                className={`urna-fim-item urna-fim-item-${modifier}`}
+              >
+                <header className="urna-fim-item-head">
+                  <span className="urna-fim-item-index">{String(idx + 1).padStart(2, '0')}</span>
+                  <span className="urna-fim-cargo">{c.nome}</span>
+                </header>
+
+                {isEspecial ? (
+                  <div className="urna-fim-especial">
+                    <span className={`urna-fim-tag urna-fim-tag-${voto.toLowerCase()}`}>
+                      {voto === '—' ? 'SEM VOTO' : `VOTO ${voto}`}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="urna-fim-corpo">
+                    <div className="urna-fim-numero-bloco">
+                      <span className="urna-fim-numero-badge">{voto}</span>
+                    </div>
+                    <div className="urna-fim-info">
+                      <span className="urna-fim-candidato-nome">
+                        {candidato?.nome || 'Candidato'}
+                      </span>
+                      <span className="urna-fim-candidato-partido">
+                        {candidato?.partido || '—'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </article>
+            );
+          })}
+        </div>
+
+        <button
+          className="urna-btn-reiniciar"
+          onClick={() => {
+            setBarraProgresso(0);
+            setEstado(INICIAL);
+            setTurno(null);
+            setTipoEleicao(null);
+          }}
+        >
+          Votar Novamente
+        </button>
+      </div>
+    </div>
+  );
+}
 
   // =========================================================================
   // RENDER PRINCIPAL DA URNA
   // =========================================================================
   const bloqueado = estado.fase === 'encerrando';
 
+  const cargoAtualFolheto = CARGOS[estado.cargoIdx] || CARGOS[0];
+  const candidatosFolheto = getCandidatos(cargoAtualFolheto.id, turno, tipoEleicao);
+
+  const handleDragStart = (e) => {
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    setDragStartY(y);
+    setDragging(true);
+  };
+
+  const handleDragMove = (e) => {
+    if (!dragging || dragStartY === null) return;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    const delta = dragStartY - y; // positivo = arrastou para cima
+    if (delta > 30) { setFolhetoAberto(true); setDragging(false); setDragStartY(null); }
+    if (delta < -30) { setFolhetoAberto(false); setDragging(false); setDragStartY(null); }
+  };
+
+  const handleDragEnd = () => {
+    setDragging(false);
+    setDragStartY(null);
+  };
+
   return (
     <div className="urna-page">
       <div className="urna-voltar-row">
         <button className="icon-button" onClick={onVoltar}>
-          <ArrowLeftIcon /><span>Voltar</span>
+          <ArrowLeftIcon /><span>Sair</span>
         </button>
       </div>
 
@@ -453,7 +611,7 @@ export default function SimuladorUrna({ onVoltar }) {
                 </div>
                 {renderConteudoDisplay()}
                 <div className="display-rodape">
-                  Município: 13218 - ARACATI &nbsp;&nbsp; Zona: 0008
+                  Município: 13897 - FORTALEZA    Zona: 0080    Seção: 0329
                 </div>
               </div>
             </div>
@@ -526,6 +684,51 @@ export default function SimuladorUrna({ onVoltar }) {
         {estado.fase === 'encerrando'  && 'Registrando voto...'}
         {(estado.fase === 'votando' || estado.fase === 'confirmar') && `Votando para: ${CARGOS[estado.cargoIdx].nome}`}
       </div>
+
+      {/* ================================================================
+          FOLHETO — cola de candidatos arrastável para cima
+          ================================================================ */}
+      {estado.fase !== 'encerrando' && (
+        <div
+          className={`folheto-drawer ${folhetoAberto ? 'folheto-aberto' : ''}`}
+          onMouseDown={handleDragStart}
+          onMouseMove={handleDragMove}
+          onMouseUp={handleDragEnd}
+          onMouseLeave={handleDragEnd}
+          onTouchStart={handleDragStart}
+          onTouchMove={handleDragMove}
+          onTouchEnd={handleDragEnd}
+        >
+          {/* Alça de arrasto */}
+          <div className="folheto-alca" onClick={() => setFolhetoAberto(v => !v)}>
+            <div className="folheto-alca-barra" />
+            <span className="folheto-alca-texto">
+              {folhetoAberto ? 'Fechar cola ▼' : 'Ver candidatos ▲'}
+            </span>
+          </div>
+
+          {/* Conteúdo da cola */}
+          <div className="folheto-conteudo">
+            <h3 className="folheto-titulo">
+              Cola de Candidatos  {cargoAtualFolheto.nome}
+            </h3>
+            <div className="folheto-lista">
+              {Object.entries(candidatosFolheto).map(([numero, c]) => (
+                <div key={numero} className="folheto-item">
+                  <span className="folheto-numero">{numero}</span>
+                  <div className="folheto-info">
+                    <span className="folheto-nome">{c.nome}</span>
+                    <span className="folheto-partido">{c.partido}</span>
+                  </div>
+                </div>
+              ))}
+              {Object.keys(candidatosFolheto).length === 0 && (
+                <p className="folheto-vazio">Nenhum candidato cadastrado para este cargo.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
