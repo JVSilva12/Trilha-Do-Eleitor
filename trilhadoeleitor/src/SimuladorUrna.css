@@ -1,5 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Liberation+Sans:wght@400;700&family=Noto+Sans:wght@400;700&display=swap');
 
+/* =========================================================================
+   PÁGINA WRAPPER
+   ========================================================================= */
 .urna-page {
   min-height: 100vh;
   background: #3a3a3a;
@@ -35,12 +38,16 @@
 }
 .urna-voltar-row .icon-button:hover { background: rgba(255,255,255,0.18); }
 
+/* =========================================================================
+   CORPO EXTERNO DA URNA — formato trapezoidal com topo mais largo
+   ========================================================================= */
 .urna-externa {
   width: 100%;
   max-width: 860px;
   position: relative;
 }
 
+/* Tampa superior trapezoidal */
 .urna-tampa {
   background: linear-gradient(180deg, #d4cfc0 0%, #c4bfb0 60%, #b8b3a4 100%);
   height: 90px;
@@ -51,10 +58,12 @@
     inset 0 -2px 4px rgba(0,0,0,0.1);
   border: 1px solid #a8a398;
   border-bottom: none;
+  /* Efeito trapezoidal: topo ligeiramente mais largo via perspective */
   clip-path: polygon(0% 100%, 2% 0%, 98% 0%, 100% 100%);
   margin-bottom: -1px;
 }
 
+/* Corpo principal */
 .urna-corpo-principal {
   background: linear-gradient(180deg, #cdc8b8 0%, #c0bba8 100%);
   border: 1px solid #a8a398;
@@ -66,12 +75,16 @@
     0 4px 16px rgba(0,0,0,0.35);
 }
 
+/* Faixa interna que contém display + teclado */
 .urna-meio {
   display: flex;
   gap: 18px;
   align-items: flex-start;
 }
 
+/* =========================================================================
+   DISPLAY (LCD)
+   ========================================================================= */
 .urna-display-wrapper {
   flex: 1;
   min-width: 0;
@@ -88,6 +101,7 @@
   min-height: 320px;
 }
 
+/* Linha do topo do display: data + TREINAMENTO */
 .display-topo {
   display: flex;
   justify-content: space-between;
@@ -114,6 +128,7 @@
   margin-right: 8px;
 }
 
+/* Área central do conteúdo */
 .display-conteudo {
   flex: 1;
   display: flex;
@@ -124,6 +139,7 @@
   gap: 0;
 }
 
+/* Texto grande central (estado inicial / confirmação / etc.) */
 .display-texto-central {
   font-size: 19px;
   font-weight: 700;
@@ -134,6 +150,7 @@
   text-transform: uppercase;
 }
 
+/* Cargo atual (ex: DEPUTADO FEDERAL) */
 .display-cargo {
   font-size: 13px;
   font-weight: 700;
@@ -144,6 +161,7 @@
   text-transform: uppercase;
 }
 
+/* Boxes de dígitos */
 .display-digitos-row {
   display: flex;
   gap: 8px;
@@ -184,6 +202,7 @@
   50% { opacity: 0; }
 }
 
+/* Número grande na tela de confirmação */
 .display-numero-confirmacao {
   font-size: 48px;
   font-weight: 700;
@@ -193,6 +212,7 @@
   margin: 8px 0;
 }
 
+/* Texto de instrução menor */
 .display-instrucao {
   font-size: 12px;
   color: #333;
@@ -233,6 +253,9 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* =========================================================================
+   PAINEL DIREITO: LOGO + TECLADO
+   ========================================================================= */
 .urna-painel-direito {
   display: flex;
   flex-direction: column;
@@ -241,6 +264,7 @@
   flex-shrink: 0;
 }
 
+/* Logo Justiça Eleitoral */
 .urna-logo-je {
   background: linear-gradient(180deg, #e8e4dc 0%, #d8d4cc 100%);
   border: 1px solid #b0aca0;
@@ -261,6 +285,7 @@
   flex-shrink: 0;
 }
 
+/* Brasão SVG inline */
 .urna-brasao-svg {
   width: 34px;
   height: 34px;
@@ -280,6 +305,7 @@
   text-align: right;
 }
 
+/* Painel preto do teclado */
 .urna-teclado-painel {
   background: linear-gradient(180deg, #2a2a2a 0%, #1e1e1e 100%);
   border: 1px solid #111;
@@ -291,18 +317,21 @@
   box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
 }
 
+/* Grid numérico 3×3 */
 .urna-numpad-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
 }
 
+/* Tecla zero sozinha, centralizada */
 .urna-numpad-zero {
   display: flex;
   justify-content: center;
   margin-top: 0;
 }
 
+/* Tecla numérica */
 .urna-tecla-num {
   background: linear-gradient(180deg, #3a3a3a 0%, #282828 100%);
   border: 1px solid #111;
@@ -323,6 +352,7 @@
   position: relative;
 }
 
+/* Pontos Braille (decorativos) */
 .urna-tecla-num::after {
   content: '⠿';
   position: absolute;
@@ -346,12 +376,14 @@
   width: 52px;
 }
 
+/* Divisor entre numpad e botões de ação */
 .urna-teclado-divisor {
   height: 1px;
   background: rgba(255,255,255,0.08);
   margin: 2px 0;
 }
 
+/* Linha de botões coloridos */
 .urna-teclas-acao-row {
   display: flex;
   gap: 5px;
@@ -402,6 +434,9 @@
 }
 .urna-tecla-confirma:hover { background: linear-gradient(180deg, #38b038 0%, #208820 100%); }
 
+/* =========================================================================
+   BASE DA URNA — pés/suportes
+   ========================================================================= */
 .urna-base {
   display: flex;
   justify-content: space-around;
@@ -418,6 +453,10 @@
   border-top: none;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
+
+/* =========================================================================
+   TELA DE ENCERRAMENTO — FIM + barra verde
+   ========================================================================= */
 
 .display-encerrando {
   align-items: center !important;
@@ -474,6 +513,143 @@
   font-family: 'Liberation Sans', Arial, sans-serif;
 }
 
+/* =========================================================================
+   FOLHETO — DRAWER ARRASTÁVEL DE CANDIDATOS
+   ========================================================================= */
+
+.folheto-drawer {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(calc(100% - 52px));
+  width: 100%;
+  max-width: 620px;
+  background: #fffdf4;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.35);
+  border-top: 3px solid #d4a843;
+  transition: transform 0.35s cubic-bezier(.32,.72,0,1);
+  z-index: 100;
+  cursor: grab;
+  user-select: none;
+  max-height: 72vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.folheto-drawer.folheto-aberto {
+  transform: translateX(-50%) translateY(0);
+  cursor: default;
+}
+
+/* Alça de arrasto */
+.folheto-alca {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 16px 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  border-bottom: 1px solid #e8d99a;
+}
+
+.folheto-alca-barra {
+  width: 40px;
+  height: 4px;
+  background: #c8a830;
+  border-radius: 2px;
+  opacity: 0.6;
+}
+
+.folheto-alca-texto {
+  font-size: 11px;
+  font-weight: 700;
+  color: #8a6a10;
+  letter-spacing: 0.06em;
+  font-family: 'Liberation Sans', Arial, sans-serif;
+}
+
+/* Área de conteúdo rolável */
+.folheto-conteudo {
+  overflow-y: auto;
+  padding: 12px 20px 24px;
+  flex: 1;
+}
+
+.folheto-titulo {
+  font-size: 13px;
+  font-weight: 700;
+  color: #5a4008;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+  font-family: 'Liberation Sans', Arial, sans-serif;
+  text-align: center;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #d4a843;
+}
+
+.folheto-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.folheto-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 12px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e8d99a;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: background 0.15s;
+}
+
+.folheto-item:hover { background: #fef9e7; }
+
+.folheto-numero {
+  font-family: 'Liberation Sans', monospace;
+  font-size: 20px;
+  font-weight: 900;
+  color: #1a1a1a;
+  min-width: 54px;
+  text-align: center;
+  background: #fef3c7;
+  border-radius: 6px;
+  padding: 4px 6px;
+  border: 1px solid #fcd34d;
+  letter-spacing: 0.04em;
+}
+
+.folheto-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.folheto-nome {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111;
+  font-family: 'Liberation Sans', Arial, sans-serif;
+}
+
+.folheto-partido {
+  font-size: 10px;
+  color: #666;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: 'Liberation Sans', Arial, sans-serif;
+}
+
+/* =========================================================================
+   INDICADOR DE PROGRESSO
+   ========================================================================= */
 .urna-progresso-cargos {
   display: flex;
   gap: 8px;
@@ -511,6 +687,10 @@
   font-family: 'Liberation Sans', Arial, sans-serif;
   letter-spacing: 0.04em;
 }
+
+/* =========================================================================
+   TELA DE SELEÇÃO DE TIPO DE ELEIÇÃO
+   ========================================================================= */
 
 .urna-selecao-card {
   background: #fff;
@@ -568,6 +748,7 @@
   overflow: hidden;
 }
 
+/* Brilho sutil no topo */
 .urna-opcao-card::before {
   content: '';
   position: absolute;
@@ -655,6 +836,10 @@
   .urna-selecao-card { padding: 28px 20px; }
 }
 
+/* =========================================================================
+   TELA DE SELEÇÃO DE TURNO
+   ========================================================================= */
+
 .urna-turno-opcoes {
   display: flex;
   gap: 14px;
@@ -681,6 +866,7 @@
 .urna-turno-card:hover { transform: translateY(-8px) scale(1.03); }
 .urna-turno-card:active { transform: translateY(-2px) scale(0.98); transition-duration: 0.1s; }
 
+/* ---- 1º TURNO ---- */
 .urna-turno-primeiro {
   box-shadow: 0 10px 30px rgba(30,58,138,0.45), 0 2px 8px rgba(0,0,0,0.2);
 }
@@ -695,6 +881,7 @@
   overflow: hidden;
 }
 
+/* Círculo decorativo de fundo */
 .urna-turno-primeiro .urna-turno-topo::before {
   content: '';
   position: absolute;
@@ -722,6 +909,7 @@
   justify-content: center;
 }
 
+/* ---- 2º TURNO ---- */
 .urna-turno-segundo {
   box-shadow: 0 10px 30px rgba(6,78,59,0.45), 0 2px 8px rgba(0,0,0,0.2);
 }
@@ -762,6 +950,7 @@
   justify-content: center;
 }
 
+/* ---- ELEMENTOS INTERNOS ---- */
 .urna-turno-numero {
   font-size: 64px;
   font-weight: 900;
@@ -800,101 +989,242 @@
   .urna-turno-opcoes { flex-direction: column; }
 }
 
+/* =========================================================================
+   TELA FINAL
+   ========================================================================= */
+.urna-fim-page {
+  background: radial-gradient(1200px 600px at 50% -10%, #3a3a3a 0%, #3a3a3a 55%, #3a3a3a 100%);
+  padding-bottom: 64px;
+}
+
 .urna-fim-card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 36px 32px;
-  max-width: 480px;
   width: 100%;
-  text-align: center;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  font-family: 'Liberation Sans', Arial, sans-serif;
-}
-
-.urna-fim-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  background: #dcfce7;
-  border-radius: 50%;
-  margin: 0 auto 16px;
-  color: #16a34a;
-}
-
-.urna-fim-icon svg {
-  width: 38px;
-  height: 38px;
-  stroke: #16a34a;
-  stroke-width: 2.5;
-}
-
-.urna-fim-card h2 {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin: 0 0 8px;
-}
-
-.urna-fim-card > p {
-  color: #64748b;
-  font-size: 14px;
-  margin: 0 0 24px;
-}
-
-.urna-fim-resumo {
-  background: #f8fafc;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
+  max-width: 880px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 24px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45), 0 2px 0 rgba(255,255,255,0.04) inset;
   overflow: hidden;
-  margin-bottom: 24px;
+  animation: urna-fim-enter 0.5s cubic-bezier(.2,.7,.2,1) both;
 }
 
-.urna-fim-linha {
+@keyframes urna-fim-enter {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---- HERO ---- */
+.urna-fim-hero {
+  position: relative;
+  padding: 36px 28px 28px;
+  background:
+    radial-gradient(600px 200px at 50% 0%, rgba(22,163,74,0.18), transparent 70%),
+    linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+  color: #fff;
+  text-align: center;
+}
+
+.urna-fim-check-ring {
+  width: 78px; height: 78px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #16a34a 0%, #1da850 100%);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 6px rgba(34,197,94,0.18), 0 12px 28px rgba(22,163,74,0.45);
+  animation: urna-fim-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes urna-fim-pulse {
+  0%, 100% { box-shadow: 0 0 0 6px rgba(34,197,94,0.18), 0 12px 28px rgba(22,163,74,0.45); }
+  50%      { box-shadow: 0 0 0 14px rgba(34,197,94,0.06), 0 12px 28px rgba(22,163,74,0.55); }
+}
+
+.urna-fim-titulo {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 4px 0 6px;
+  letter-spacing: 0.01em;
+}
+
+.urna-fim-subtitulo {
+  color: #cbd5e1;
+  font-size: 14.5px;
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.urna-fim-stats {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 16px;
-  border-bottom: 1px solid #e2e8f0;
-  font-size: 13px;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 22px;
+  flex-wrap: wrap;
 }
 
-.urna-fim-linha:last-child { border-bottom: none; }
+.urna-fim-stat {
+  min-width: 110px;
+  padding: 12px 18px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex; flex-direction: column; align-items: center;
+  backdrop-filter: blur(4px);
+}
+.urna-fim-stat-num {
+  font-size: 24px; font-weight: 800; color: #fff; line-height: 1;
+}
+.urna-fim-stat-label {
+  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #94a3b8; margin-top: 6px;
+}
+.urna-fim-stat-ok .urna-fim-stat-num { color: #4ade80; }
+.urna-fim-stat-warn .urna-fim-stat-num { color: #fbbf24; }
+
+/* ---- LISTA ---- */
+.urna-fim-lista {
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+@media (min-width: 720px) {
+  .urna-fim-lista { grid-template-columns: 1fr 1fr; }
+}
+
+.urna-fim-item {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 6px solid #612683;
+  border-radius: 14px;
+  padding: 14px 16px 16px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.urna-fim-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px #0f172a1f;
+}
+.urna-fim-item-branco { border-left-color: #64748b; background: #f8fafc; }
+.urna-fim-item-nulo   { border-left-color: #dc2626; background: #fff5f5; }
+
+.urna-fim-item-head {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #e2e8f0;
+}
+.urna-fim-item-index {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: #6d3ad6;
+  padding: 3px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.06em;
+}
+.urna-fim-item-nulo   .urna-fim-item-index { background: #dc2626; }
+.urna-fim-item-branco .urna-fim-item-index { background: #64748b; }
 
 .urna-fim-cargo {
+  font-size: 12.5px;
   font-weight: 700;
-  color: #1e3a8a;
-  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+/* Voto válido */
+.urna-fim-corpo {
+  display: flex; align-items: center; gap: 16px;
+}
+.urna-fim-numero-bloco {
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 86px;
+  padding: 10px 8px;
+  background: linear-gradient(180deg, #1e3a8a 0%, #6d3ad6 100%);
+  border-radius: 12px;
+  box-shadow: 0 6px 14px #6d3ad6;
+}
+.urna-fim-numero-label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: #bfdbfe;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.urna-fim-numero-badge {
+  font-size: 26px;
+  font-weight: 800;
+  color: #fff;
   letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
 }
 
-.urna-fim-numero {
-  font-family: 'Liberation Sans', monospace;
-  font-size: 16px;
+.urna-fim-info {
+  display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1;
+}
+.urna-fim-candidato-nome {
+  font-size: 17px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #0f172a;
+  line-height: 1.25;
+  word-break: break-word;
+}
+.urna-fim-candidato-partido {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #6d3ad6;
   background: #dbeafe;
-  padding: 2px 10px;
-  border-radius: 4px;
+  border: 1px solid #bfdbfe;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
 }
 
+/* Voto especial */
+.urna-fim-especial { display: flex; justify-content: flex-start; }
+.urna-fim-tag {
+  display: inline-flex; align-items: center;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  padding: 8px 16px;
+  border-radius: 10px;
+  text-transform: uppercase;
+}
+.urna-fim-tag-branco { background: #e2e8f0; color: #334155; border: 1px solid #cbd5e1; }
+.urna-fim-tag-nulo   { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.urna-fim-tag-—,
+.urna-fim-tag--    { background: #f1f5f9; color: #64748b; border: 1px dashed #cbd5e1; }
+
+/* Botão reiniciar */
 .urna-btn-reiniciar {
-  background: #1e3a8a;
+  display: block;
+  margin: 8px auto 28px;
+  padding: 14px 36px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #6d3ad6 100%);
   color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 12px 32px;
-  font-size: 14px;
+  border-radius: 999px;
+  font-size: 15px;
   font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   cursor: pointer;
-  font-family: inherit;
-  transition: background 0.2s;
-  width: 100%;
+  box-shadow: 0 10px 26px #6d3ad666;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
+.urna-btn-reiniciar:hover  { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(37,99,235,0.5); filter: brightness(1.05); }
+.urna-btn-reiniciar:active { transform: translateY(0); filter: brightness(0.95); }
 
-.urna-btn-reiniciar:hover { background: #1e40af; }
-
+/* =========================================================================
+   RESPONSIVO
+   ========================================================================= */
 @media (max-width: 600px) {
   .urna-tampa { height: 60px; }
   .urna-meio { flex-direction: column; }
@@ -903,4 +1233,12 @@
   .urna-teclado-painel { border-radius: 4px; }
   .urna-teclas-acao-row { gap: 8px; }
   .urna-tecla-acao { padding: 10px 4px; font-size: 10px; }
+}
+
+.folheto-vazio {
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+  margin: 16px 0;
+  font-family: 'Liberation Sans', Arial, sans-serif;
 }
