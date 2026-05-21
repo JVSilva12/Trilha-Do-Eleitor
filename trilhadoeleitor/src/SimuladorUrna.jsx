@@ -110,7 +110,7 @@ export default function SimuladorUrna({ onVoltar }) {
         // Barra completa → mostra FIM e toca o som
         setSubFase('fim');
         const audio = new Audio(somUrna);
-        audio.volume = 0.75;
+        audio.volume = 0.50;
         audio.play().catch(() => {});
         // Após 2.5s exibindo FIM, vai para tela de resumo
         setTimeout(() => {
@@ -411,7 +411,7 @@ export default function SimuladorUrna({ onVoltar }) {
       <div className="urna-page">
         <div className="urna-voltar-row">
           <button className="icon-button" onClick={() => setTipoEleicao(null)}>
-            <ArrowLeftIcon /><span>Sair</span>
+            <ArrowLeftIcon /><span>Voltar</span>
           </button>
         </div>
         <div className="urna-selecao-card">

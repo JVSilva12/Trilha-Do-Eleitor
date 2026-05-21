@@ -8,6 +8,8 @@ const API_URL = "http://127.0.0.1:8000";
 export default function PainelConteudista({ onVoltar, trilhaId }) {
   const [trilhaSelecionada, setTrilhaSelecionada] = useState(trilhaId ? String(trilhaId) : '1');
   const [tipoConteudo, setTipoConteudo] = useState('teoria');
+  const [uploadandoCapa, setUploadandoCapa] = useState(false);
+  const [previewCapa, setPreviewCapa] = useState(null);
   
   // =========================================================================
   // ESTADOS DO PASSO 3: GERENCIAMENTO DE MÚLTIPLOS MÓDULOS POR TRILHA
@@ -75,6 +77,28 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
   const handleRemoverBloco = (index) => {
     const filtrados = blocos.filter((_, i) => i !== index).map((b, i) => ({ ...b, ordem: i }));
     setBlocos(filtrados.length > 0 ? filtrados : [{ tipo: 'texto', valor: '', ordem: 0 }]);
+  };
+
+  const handleUploadCapaTrilha = async (evento) => {
+    const arquivo = evento.target.files[0];
+    if (!arquivo) return;
+    setUploadandoCapa(true);
+    const dadosFormulario = new FormData();
+    dadosFormulario.append('file', arquivo);
+    try {
+      const response = await axios.post(`${API_URL}/trilhas/upload-imagem`, dadosFormulario, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      const urlImagem = response.data.url_imagem;
+      // Persiste a nova imagem na trilha via PATCH
+      await axios.patch(`${API_URL}/trilhas/${trilhaSelecionada}/imagem`, { imagem: urlImagem });
+      setPreviewCapa(urlImagem);
+      alert("Imagem de capa atualizada com sucesso!");
+    } catch (error) {
+      alert("Erro ao enviar imagem de capa. Tente novamente.");
+    } finally {
+      setUploadandoCapa(false);
+    }
   };
 
   const handleUploadImagemBloco = async (index, evento) => {
@@ -243,6 +267,28 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
                   </select>
                 </div>
               </div>
+            </div>
+
+            {/* SEÇÃO: IMAGEM DE CAPA DA TRILHA */}
+            <div className="field" style={{ borderTop: '1px solid #e2e8f0', paddingTop: '16px', marginTop: '4px' }}>
+              <label className="field-label" style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                🖼️ Imagem de Capa da Trilha
+              </label>
+              {previewCapa && (
+                <div style={{ marginBottom: '10px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', maxHeight: '140px' }}>
+                  <img src={previewCapa} alt="Capa atual" style={{ width: '100%', height: '140px', objectFit: 'cover', display: 'block' }} />
+                </div>
+              )}
+              <label style={{
+                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                padding: '8px 16px', background: '#1e3a8a', color: '#fff',
+                borderRadius: '8px', cursor: uploadandoCapa ? 'not-allowed' : 'pointer',
+                fontSize: '13px', fontWeight: 600, opacity: uploadandoCapa ? 0.7 : 1
+              }}>
+                {uploadandoCapa ? 'Enviando...' : '📁 Trocar imagem de capa'}
+                <input type="file" accept="image/*" style={{ display: 'none' }} disabled={uploadandoCapa} onChange={handleUploadCapaTrilha} />
+              </label>
+              <span style={{ fontSize: '11px', color: '#94a3b8', marginLeft: '10px' }}>PNG, JPG ou WEBP</span>
             </div>
 
             {/* =========================================================================

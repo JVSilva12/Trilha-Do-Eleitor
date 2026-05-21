@@ -3,7 +3,7 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #f8f9fe;
+  background-color: #fcf8fe;
   position: relative;
   font-family: 'Inter', system-ui, sans-serif;
 }
