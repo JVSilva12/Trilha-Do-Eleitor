@@ -25,8 +25,7 @@ export const criarTrilha = async (dadosTrilha) => {
       categoria: dadosTrilha.categoria,
       nivel: dadosTrilha.nivel,
       imagem: dadosTrilha.imagem || null,
-      status: dadosTrilha.status || 'rascunho',
-      visibilidade: dadosTrilha.visibilidade || 'Pública'
+      status: dadosTrilha.status || 'rascunho'
     });
     return response.data;
   } catch (error) {

@@ -10,6 +10,7 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
   const [tipoConteudo, setTipoConteudo] = useState('teoria');
   const [uploadandoCapa, setUploadandoCapa] = useState(false);
   const [previewCapa, setPreviewCapa] = useState(null);
+  const [trilhasDisponiveis, setTrilhasDisponiveis] = useState([]);
   
   // =========================================================================
   // ESTADOS DO PASSO 3: GERENCIAMENTO DE MÚLTIPLOS MÓDULOS POR TRILHA
@@ -48,6 +49,13 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
       console.error("Erro ao listar questões do simulado:", error);
     }
   };
+
+  // Carrega a lista de trilhas disponíveis para o select (dinâmico, não hardcoded)
+  useEffect(() => {
+    axios.get(`${API_URL}/trilhas`)
+      .then(res => setTrilhasDisponiveis(res.data))
+      .catch(err => console.error('Erro ao carregar lista de trilhas:', err));
+  }, []);
 
   // Sincronizador de abas e dados baseado na trilha ativa
   useEffect(() => {
@@ -238,7 +246,7 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
           <button className="icon-button" onClick={onVoltar} title="Voltar para o gerenciador"><ArrowLeftIcon /></button>
           <div className="header-titles">
             <h1 className="header-title">Editor Pedagógico de Mídias e Quizzes</h1>
-            <p className="header-subtitle">Trilha Ativa ID: {trilhaSelecionada}</p>
+            <p className="header-subtitle">Editando: <strong>{trilhasDisponiveis.find(t => String(t.id) === String(trilhaSelecionada))?.nome || `Trilha #${trilhaSelecionada}`}</strong></p>
           </div>
         </div>
       </header>
@@ -252,9 +260,9 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
                 <label className="field-label">Trilha Alvo</label>
                 <div className="field-input select-wrapper">
                   <select value={trilhaSelecionada} onChange={(e) => setTrilhaSelecionada(e.target.value)} disabled={!!trilhaId}>
-                    <option value="1">Urna Eletrônica</option>
-                    <option value="2">Processo Eleitoral</option>
-                    <option value="3">Combate às Fake News</option>
+                    {trilhasDisponiveis.map(t => (
+                      <option key={t.id} value={String(t.id)}>{t.nome}</option>
+                    ))}
                   </select>
                 </div>
               </div>

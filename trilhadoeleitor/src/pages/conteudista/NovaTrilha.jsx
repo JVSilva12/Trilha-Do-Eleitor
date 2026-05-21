@@ -24,8 +24,7 @@ export default function NovaTrilha({ onVoltar }) {
     categoria: '', 
     nivel: '', 
     imagem: '', 
-    status: 'rascunho', 
-    visibilidade: 'Pública' 
+    status: 'rascunho'
   }); 
 
   const atualizarCampo = (campo, valor) => { 
@@ -252,24 +251,6 @@ export default function NovaTrilha({ onVoltar }) {
                   <span>
                     <strong>Publicada</strong>
                     <small>Disponível imediatamente aos eleitores.</small>
-                  </span>
-                </label>
-              </fieldset>
-
-              <fieldset className="nt-fieldset">
-                <legend className="nt-legend">Visibilidade <span className="nt-required">*</span></legend>
-                <label className="nt-radio-label">
-                  <input type="radio" name="visibilidade" checked={form.visibilidade === 'Pública'} onChange={() => atualizarCampo('visibilidade', 'Pública')} />
-                  <span>
-                    <strong>Pública</strong>
-                    <small>Livre acesso para qualquer usuário.</small>
-                  </span>
-                </label>
-                <label className="nt-radio-label">
-                  <input type="radio" name="visibilidade" checked={form.visibilidade === 'Privada'} onChange={() => atualizarCampo('visibilidade', 'Privada')} />
-                  <span>
-                    <strong>Privada</strong>
-                    <small>Apenas conteudistas possuem acesso.</small>
                   </span>
                 </label>
               </fieldset>
