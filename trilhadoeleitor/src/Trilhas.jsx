@@ -122,7 +122,7 @@ export default function Trilhas({ emailUsuario, onLogout, onIrParaPerfil, onIrPa
 
       <main className="home-page-content" style={{ padding: '40px 5%', maxWidth: '1200px', margin: '0 auto' }}>
         <div className="welcome-section">
-          <h1>Minhas Trilhas</h1>
+          <h1>Trilhas Disponíveis</h1>
           <p>Olá, <strong>{apelido || 'Eleitor'}</strong>! Explore os módulos de aprendizado disponíveis na plataforma.</p>
         </div>
 
