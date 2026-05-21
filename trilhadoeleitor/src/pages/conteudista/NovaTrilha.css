@@ -1,0 +1,453 @@
+.nt-page {
+  background: #f8fafc;
+}
+
+.nt-main {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 28px 20px 40px;
+}
+
+/* Cabeçalho da página */
+.nt-header-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.nt-back-btn {
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.nt-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 4px;
+}
+
+.nt-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Formulário */
+.nt-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Card de seção */
+.nt-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+/* Título de seção com ícone — tamanho controlado */
+.nt-section-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin: 0 0 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Ícone do título: 14×14, sem herdar tamanho de SVG default */
+.nt-icon {
+  width: 14px !important;
+  height: 14px !important;
+  flex-shrink: 0;
+  color: #3b82f6;
+}
+
+/* Campos */
+.nt-field {
+  margin-bottom: 12px;
+}
+
+.nt-field:last-child {
+  margin-bottom: 0;
+}
+
+.nt-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 5px;
+}
+
+.nt-required {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.nt-input-wrap {
+  display: flex;
+  align-items: center;
+  padding: 7px 11px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.nt-input-wrap:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+
+.nt-input-wrap input,
+.nt-input-wrap select {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  font-size: 13px;
+  background: transparent;
+  color: #1e293b;
+  font-family: inherit;
+}
+
+.nt-textarea-wrap {
+  align-items: flex-start;
+  padding: 8px 11px;
+}
+
+.nt-textarea-wrap textarea {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  font-size: 13px;
+  background: transparent;
+  color: #1e293b;
+  font-family: inherit;
+  resize: none;
+  line-height: 1.5;
+}
+
+.nt-counter {
+  display: block;
+  text-align: right;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 3px;
+}
+
+/* Linha dupla (categoria + nível) */
+.nt-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.nt-flex1 {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Grid de seleção de nível — botões compactos */
+.nt-niveis-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.nt-nivel-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 8px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  text-align: center;
+}
+
+.nt-nivel-btn:hover {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.nt-nivel-btn.nt-nivel-ativo {
+  border-color: #1e3a8a;
+  background: #eff6ff;
+  box-shadow: 0 0 0 3px rgba(30,58,138,0.08);
+}
+
+/* Ícone dentro do botão de nível — pequeno e contido */
+.nt-nivel-icon {
+  width: 16px !important;
+  height: 16px !important;
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.nt-nivel-btn.nt-nivel-ativo .nt-nivel-icon {
+  color: #1e3a8a;
+}
+
+.nt-nivel-nome {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.nt-nivel-desc {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.2;
+}
+
+/* Seção de capa — layout lado a lado */
+.nt-capa-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.nt-capa-preview {
+  width: 120px;
+  height: 80px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  border: 1.5px dashed #cbd5e1;
+  background: #f1f5f9;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nt-capa-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.nt-capa-placeholder {
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: center;
+  padding: 0 8px;
+}
+
+.nt-capa-controls {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Botão de upload — compacto */
+.nt-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: #1e3a8a;
+  color: #fff;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, background 0.2s;
+  white-space: nowrap;
+}
+
+.nt-upload-btn:hover {
+  background: #1e40af;
+}
+
+.nt-upload-btn.nt-upload-loading {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Ícone dentro do botão de upload */
+.nt-upload-icon {
+  width: 14px !important;
+  height: 14px !important;
+  flex-shrink: 0;
+}
+
+.nt-upload-hint {
+  display: block;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 5px;
+}
+
+/* Grid de configurações (status + visibilidade) */
+.nt-config-grid {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.nt-fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  min-width: 160px;
+}
+
+.nt-legend {
+  font-size: 12px;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.nt-radio-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.nt-radio-label input[type="radio"] {
+  margin-top: 3px;
+  flex-shrink: 0;
+  accent-color: #1e3a8a;
+}
+
+.nt-radio-label span {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.nt-radio-label strong {
+  font-size: 12px;
+  color: #1e293b;
+}
+
+.nt-radio-label small {
+  font-size: 11px;
+  color: #64748b;
+}
+
+/* Caixa de aviso — proporções corretas */
+.nt-info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #1e40af;
+}
+
+/* Ícone de info — pequeno e alinhado ao texto */
+.nt-info-icon {
+  width: 14px !important;
+  height: 14px !important;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.nt-info-box p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Botões de ação */
+.nt-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.nt-btn-cancelar {
+  padding: 9px 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.nt-btn-cancelar:hover {
+  background: #f8fafc;
+}
+
+.nt-btn-salvar {
+  padding: 9px 28px;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #1e3a8a, #2563eb);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(30,58,138,0.25);
+  transition: opacity 0.2s;
+}
+
+.nt-btn-salvar:hover {
+  opacity: 0.9;
+}
+
+.nt-btn-salvar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsivo */
+@media (max-width: 560px) {
+  .nt-row {
+    flex-direction: column;
+  }
+
+  .nt-niveis-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nt-capa-row {
+    flex-direction: column;
+  }
+
+  .nt-capa-preview {
+    width: 100%;
+    height: 100px;
+  }
+
+  .nt-config-grid {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .nt-actions {
+    flex-direction: column-reverse;
+  }
+
+  .nt-btn-cancelar,
+  .nt-btn-salvar {
+    width: 100%;
+    text-align: center;
+  }
+}

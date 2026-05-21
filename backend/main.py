@@ -381,27 +381,41 @@ def concluir_modulo_estudante(trilha_id: int, modulo_id: int, email: str, db: Se
 
 @app.get("/trilhas/{trilha_id}/progresso/{email}", summary="Calcula a porcentagem real de progresso do aluno na trilha")
 def obter_progresso_trilha(trilha_id: int, email: str, db: Session = Depends(database.get_db)):
-    # 1. Conta quantos módulos teóricos totais existem publicados nessa trilha
-    total_modulos = db.query(models.ConteudoTeoria).filter(models.ConteudoTeoria.trilha_id == trilha_id).count()
-    
+    # 1. Busca os IDs de todos os módulos que ATUALMENTE existem nessa trilha
+    ids_modulos_atuais = {
+        row.id for row in
+        db.query(models.ConteudoTeoria.id)
+          .filter(models.ConteudoTeoria.trilha_id == trilha_id)
+          .all()
+    }
+    total_modulos = len(ids_modulos_atuais)
+
     # Se a trilha não tiver nenhum módulo cadastrado ainda, o progresso padrão é 100% para liberar o fluxo
     if total_modulos == 0:
         return {"porcentagem": 100, "concluidos": 0, "totais": 0, "liberado_quiz": True}
-    
-    # 2. Conta quantos desses módulos o usuário logado já concluiu
-    concluidos = db.query(models.ProgressoModulo).filter(
+
+    # 2. Busca os registros de progresso filtrando apenas módulos que ainda existem.
+    #    Isso evita que registros órfãos (de módulos excluídos) ou registros de
+    #    trilhas antigas (módulos adicionados depois) distorçam o cálculo,
+    #    impedindo porcentagens acima de 100% ou travamento indevido do quiz.
+    registros_concluidos = db.query(models.ProgressoModulo).filter(
         models.ProgressoModulo.user_email == email,
-        models.ProgressoModulo.trilha_id == trilha_id
-    ).count()
-    
-    # 3. Calcula a regra de três matemática da porcentagem
-    porcentagem = int((concluidos / total_modulos) * 100)
-    
+        models.ProgressoModulo.trilha_id == trilha_id,
+        models.ProgressoModulo.modulo_id.in_(ids_modulos_atuais)
+    ).all()
+
+    concluidos_ids = [r.modulo_id for r in registros_concluidos]
+    concluidos = len(concluidos_ids)
+
+    # 3. Calcula a porcentagem com base apenas nos módulos existentes
+    porcentagem = min(int((concluidos / total_modulos) * 100), 100)
+
     return {
         "porcentagem": porcentagem,
         "concluidos": concluidos,
         "totais": total_modulos,
-        "liberado_quiz": porcentagem == 100 # Retorna True apenas se consumiu tudo
+        "concluidos_ids": concluidos_ids,  # Lista de IDs lidos — usada pelo frontend para exibir ✓/✕
+        "liberado_quiz": concluidos >= total_modulos  # Garante que todos os módulos atuais foram lidos
     }
 
 
@@ -441,6 +455,15 @@ def cadastrar_nova_trilha(trilha: TrilhaSchema, db: Session = Depends(database.g
         nova_trilha.data_atualizacao = nova_trilha.data_atualizacao.isoformat()
         
     return nova_trilha
+
+@app.patch("/trilhas/{trilha_id}/imagem", summary="Atualiza somente a imagem de capa de uma trilha")
+def atualizar_imagem_trilha(trilha_id: int, payload: dict, db: Session = Depends(database.get_db)):
+    trilha = db.query(models.Trilha).filter(models.Trilha.id == trilha_id).first()
+    if not trilha:
+        raise HTTPException(status_code=404, detail="Trilha não encontrada.")
+    trilha.imagem = payload.get("imagem")
+    db.commit()
+    return {"message": "Imagem de capa atualizada com sucesso!", "imagem": trilha.imagem}
 
 @app.delete("/trilhas/{trilha_id}", summary="Exclui uma trilha e limpa mídias em cascata")
 def deletar_trilha_pedagogica(trilha_id: int, db: Session = Depends(database.get_db)):

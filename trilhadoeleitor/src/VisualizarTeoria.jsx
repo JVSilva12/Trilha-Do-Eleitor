@@ -92,6 +92,7 @@ function VideoComControleAudio({ src, titulo, audioFundo, pausadoPorVideo }) {
 
 export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, emailUsuario, audioFundo }) {
   const [modulos, setModulos] = useState([]);
+  const [modulosLidos, setModulosLidos] = useState(new Set());
   const [moduloSelecionado, setModuloSelecionado] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(false);
@@ -129,8 +130,16 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
       try {
         setCarregando(true);
         setErro(false);
-        const response = await axios.get(`${API_URL}/trilhas/${trilhaId}/modulos`);
-        setModulos(response.data);
+        const [resModulos, resProgresso] = await Promise.all([
+          axios.get(`${API_URL}/trilhas/${trilhaId}/modulos`),
+          emailUsuario
+            ? axios.get(`${API_URL}/trilhas/${trilhaId}/progresso/${emailUsuario}`).catch(() => ({ data: { concluidos_ids: [] } }))
+            : Promise.resolve({ data: { concluidos_ids: [] } })
+        ]);
+        setModulos(resModulos.data);
+        // O endpoint de progresso retorna concluidos_ids (lista de IDs lidos pelo usuário)
+        const ids = resProgresso.data.concluidos_ids || [];
+        setModulosLidos(new Set(ids));
       } catch (err) {
         console.error("Erro ao listar sumário de módulos:", err);
         setErro(true);
@@ -157,6 +166,8 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
     if (moduloSelecionado && moduloSelecionado.id && emailUsuario) {
       try {
         await axios.post(`${API_URL}/trilhas/${trilhaId}/concluir-modulo/${moduloSelecionado.id}?email=${emailUsuario}`);
+        // Marca o módulo como lido localmente para atualizar os ícones imediatamente
+        setModulosLidos(prev => new Set([...prev, moduloSelecionado.id]));
       } catch (err) {
         console.error("Erro ao registrar conclusão do módulo no backend:", err);
       }
@@ -206,26 +217,55 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
                 <p style={{ textAlign: 'left', color: '#64748b', fontSize: '14px', margin: '0 0 6px 0' }}>
                   Selecione um dos capítulos abaixo para iniciar seus estudos textuais e audiovisuais:
                 </p>
-                {modulos.map((mod, idx) => (
-                  <div
-                    key={mod.id}
-                    className="perfil-card"
-                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 20px', background: '#fff', cursor: 'pointer', transition: 'all 0.2s' }}
-                    onClick={() => handleCarregarModuloEspecifico(mod.id)}
-                  >
-                    <div style={{ textAlign: 'left' }}>
-                      <h4 style={{ margin: '0 0 4px 0', fontSize: '15px', fontWeight: 700, color: '#1e3a8a' }}>
-                        Capítulo {idx + 1}: {mod.titulo}
-                      </h4>
-                      <span style={{ fontSize: '12px', color: '#64748b' }}>
-                        {mod.blocos.length} seções intercaladas de conteúdo
-                      </span>
+                {modulos.map((mod, idx) => {
+                  const foiLido = modulosLidos.has(mod.id);
+                  return (
+                    <div
+                      key={mod.id}
+                      className="perfil-card"
+                      style={{
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        padding: '16px 20px', cursor: 'pointer', transition: 'all 0.2s',
+                        background: foiLido ? '#f0fdf4' : '#fff',
+                        border: foiLido ? '1px solid #bbf7d0' : '1px solid #e2e8f0'
+                      }}
+                      onClick={() => handleCarregarModuloEspecifico(mod.id)}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                        {/* Ícone de status de leitura */}
+                        <div style={{
+                          width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          background: foiLido ? '#22c55e' : '#fee2e2',
+                          fontSize: '16px', fontWeight: 700,
+                          color: foiLido ? '#fff' : '#ef4444',
+                          boxShadow: foiLido ? '0 0 0 3px #dcfce7' : '0 0 0 3px #fee2e2'
+                        }}>
+                          {foiLido ? '✓' : '✕'}
+                        </div>
+                        <div style={{ textAlign: 'left' }}>
+                          <h4 style={{ margin: '0 0 3px 0', fontSize: '15px', fontWeight: 700, color: '#1e3a8a' }}>
+                            Capítulo {idx + 1}: {mod.titulo}
+                          </h4>
+                          <span style={{ fontSize: '12px', color: foiLido ? '#16a34a' : '#64748b', fontWeight: foiLido ? 600 : 400 }}>
+                            {foiLido ? '✓ Capítulo concluído' : `${mod.blocos.length} seções intercaladas de conteúdo`}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        className="nav-btn"
+                        style={{
+                          padding: '6px 14px', fontWeight: 600, whiteSpace: 'nowrap',
+                          background: foiLido ? '#dcfce7' : '#eff6ff',
+                          color: foiLido ? '#15803d' : '#2563eb',
+                          border: foiLido ? '1px solid #86efac' : '1px solid #bfdbfe'
+                        }}
+                      >
+                        {foiLido ? 'Reler' : 'Acessar Aula'}
+                      </button>
                     </div>
-                    <button className="nav-btn" style={{ padding: '6px 14px', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', fontWeight: 600 }}>
-                      Acessar Aula
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </>

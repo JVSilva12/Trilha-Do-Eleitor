@@ -5,7 +5,7 @@
 // ---- PRESIDENTE ----
 export const CANDIDATOS_PRESIDENTE = {
   '13': { nome: 'Lula da Silva',     partido: 'PT'       },
-  '22': { nome: 'Renan Bolsonaro',   partido: 'PL'       },
+  '22': { nome: 'Flávio Bolsonaro',   partido: 'PL'       },
   '55': { nome: 'Ronaldo Caiado',    partido: 'PSD'      },
   '14': { nome: 'Renan Santos',      partido: 'Missão'   },
   '30': { nome: 'Romeu Zema',        partido: 'Novo'     },
@@ -94,7 +94,7 @@ export const CANDIDATOS_VEREADOR = {
 // ---- 2º TURNO PRESIDENTE ----
 export const CANDIDATOS_PRESIDENTE_2T = {
   '13': { nome: 'Lula da Silva',   partido: 'PT' },
-  '22': { nome: 'Renan Bolsonaro', partido: 'PL' },
+  '22': { nome: 'Flávio Bolsonaro', partido: 'PL' },
 };
 
 // ---- 2º TURNO GOVERNADOR (Ceará) ----
