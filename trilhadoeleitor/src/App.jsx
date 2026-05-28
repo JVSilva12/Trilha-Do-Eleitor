@@ -10,6 +10,7 @@ import PainelConteudista from './PainelConteudista';
 import VisualizarTeoria from './VisualizarTeoria';
 import VisualizarQuiz from './VisualizarQuiz';
 import SimuladorUrna from './SimuladorUrna';
+import AtividadeEleicoes from './AtividadeEleicoes';
 import musicaFundo from './assets/MorningRoutine.mp3';
 import somClique from './assets/clique.mp3';
 
@@ -145,9 +146,11 @@ function App() {
 
       {/* Simulador da Urna Eletrônica — prática exclusiva da trilha da urna */}
       {tela === 'ver-pratica' && (
-        <SimuladorUrna
-          onVoltar={() => navegarPara('home')}
-        />
+        trilhaVisualizacao.id === 2 ? (
+          <AtividadeEleicoes onVoltar={() => navegarPara('home')} />
+        ) : (
+          <SimuladorUrna onVoltar={() => navegarPara('home')} />
+        )
       )}
     </div>
   );

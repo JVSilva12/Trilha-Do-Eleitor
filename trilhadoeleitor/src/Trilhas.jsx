@@ -6,7 +6,7 @@ import fotoProcesso from './assets/processo.png';
 import fotoFakeNews from './assets/fakenews.png'; 
 import './Trilhas.css';
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "http://127.0.0.1:1234";
 
 export default function Trilhas({ emailUsuario, onLogout, onIrParaPerfil, onIrParaPainel, onVisualizarTeoria, onVisualizarQuiz, onVisualizarPratica }) {
   const [fotoPerfil, setFotoPerfil] = useState(null);
@@ -163,6 +163,7 @@ function TrilhaCardItem({ trilha, estaInscrito, imagemResolvida, emailUsuario, o
   }, [estaInscrito, trilha.id, emailUsuario]);
 
   const ehTrilhaUrna = trilha.imagem === 'urna';
+  const ehTrilhaProcesso = trilha.imagem === 'processo' || trilha.id === 2;
 
   return (
     <div className="trilha-card">
@@ -232,8 +233,8 @@ function TrilhaCardItem({ trilha, estaInscrito, imagemResolvida, emailUsuario, o
               {progressoDados.liberado_quiz ? "Quiz" : "🔒 Quiz"}
             </button>
             
-            {/* BOTÃO PRÁTICA — abre o simulador apenas na trilha da urna */}
-            {ehTrilhaUrna ? (
+            {/* BOTAO PRATICA — abre simulador na urna e atividade na trilha 2 */}
+            {ehTrilhaUrna || ehTrilhaProcesso ? (
               <button
                 className="action-btn"
                 onClick={() => onVisualizarPratica(trilha.id, trilha.nome)}
