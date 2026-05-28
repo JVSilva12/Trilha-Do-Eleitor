@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from './api';
 import { useState } from 'react';
 import logo from './assets/TDElogo.png';
 import { MailIcon, LockIcon } from './Icons';
@@ -10,9 +10,9 @@ export default function Login({ onSwitch, onLoginSucesso }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        `http://localhost:8000/login?email=${email}&password=${senha}`
-      );
+      await api.post('/login', null, {
+        params: { email, password: senha }
+      });
 
       if (onLoginSucesso) {
         onLoginSucesso(email);

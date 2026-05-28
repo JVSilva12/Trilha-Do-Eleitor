@@ -1,0 +1,338 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Unbounded:wght@500;600&display=swap');
+
+.atividade-eleicoes {
+  min-height: 100vh;
+  padding: 32px 6vw 60px;
+  background: radial-gradient(circle at top left, #fef3c7 0%, #f8fafc 45%, #ecfeff 100%);
+  color: #0f172a;
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+}
+
+.atividade-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.atividade-header h1 {
+  font-family: 'Unbounded', 'Space Grotesk', sans-serif;
+  font-size: 28px;
+  margin: 0 0 6px;
+  letter-spacing: -0.5px;
+}
+
+.atividade-header p {
+  margin: 0;
+  color: #475569;
+  font-size: 14px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-primary,
+.btn-outline {
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(120deg, #2563eb, #0ea5e9);
+  color: #fff;
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid #cbd5f5;
+  color: #1e3a8a;
+}
+
+.btn-primary:hover,
+.btn-outline:hover {
+  transform: translateY(-1px);
+}
+
+.atividade-intro {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  margin-bottom: 26px;
+}
+
+.atividade-intro p {
+  margin: 0;
+  max-width: 560px;
+  color: #334155;
+}
+
+.progresso {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.atividade-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(320px, 1.3fr);
+  gap: 28px;
+}
+
+.funcoes-col h2,
+.cargos-col h2 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  color: #1f2937;
+}
+
+.funcoes-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px dashed #cbd5e1;
+  min-height: 240px;
+}
+
+.funcoes-lista.pulse {
+  animation: pulse 0.4s ease;
+}
+
+.funcao-chip {
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid #bae6fd;
+  background: linear-gradient(135deg, #eff6ff, #f0f9ff);
+  color: #0f172a;
+  font-weight: 600;
+  box-shadow: 0 6px 12px rgba(15, 23, 42, 0.08);
+}
+
+.funcao-chip.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.lista-vazia {
+  padding: 18px;
+  border-radius: 12px;
+  background: #fef3c7;
+  color: #92400e;
+  font-weight: 600;
+  text-align: center;
+}
+
+.dica {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 13px;
+  box-shadow: inset 0 0 0 1px rgba(251, 146, 60, 0.35);
+}
+
+.dica-spacer {
+  height: 22px;
+}
+
+.dica-flutuante {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  max-width: min(520px, 90vw);
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 247, 237, 0.98);
+  color: #9a3412;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 12px 30px rgba(154, 52, 18, 0.18);
+  border: 1px solid rgba(251, 146, 60, 0.45);
+  z-index: 20;
+}
+
+.cargos-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.cargo-card {
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 12px 25px rgba(15, 23, 42, 0.07);
+  min-height: 170px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.cargo-card.hover {
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.4), 0 16px 30px rgba(14, 165, 233, 0.2);
+  transform: translateY(-2px);
+}
+
+.cargo-card.resolvido {
+  border-color: #22c55e;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(236, 253, 245, 0.9));
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.4), 0 20px 35px rgba(16, 185, 129, 0.18);
+}
+
+.cargo-title {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.cargo-slot {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  font-size: 13px;
+  color: #475569;
+}
+
+.cargo-select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  font-size: 13px;
+  color: #0f172a;
+}
+
+.cargo-reward {
+  font-size: 13px;
+  color: #065f46;
+  font-weight: 600;
+}
+
+.finalizacao {
+  margin-top: 28px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  background: linear-gradient(120deg, #dcfce7, #e0f2fe);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.1);
+}
+
+.finalizacao h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.finalizacao p {
+  margin: 0;
+  color: #0f172a;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.01);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 900px) {
+  .atividade-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .atividade-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .atividade-eleicoes {
+    padding: 20px 5vw 50px;
+  }
+
+  .atividade-header h1 {
+    font-size: 24px;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .btn-primary,
+  .btn-outline {
+    flex: 1 1 140px;
+    justify-content: center;
+  }
+
+  .atividade-intro {
+    padding: 14px 16px;
+  }
+
+  .atividade-grid {
+    gap: 22px;
+  }
+
+  .funcoes-lista {
+    min-height: 200px;
+  }
+}
+
+@media (max-width: 520px) {
+  .atividade-header {
+    gap: 12px;
+  }
+
+  .atividade-intro {
+    gap: 16px;
+  }
+
+  .funcoes-col h2,
+  .cargos-col h2 {
+    font-size: 15px;
+  }
+
+  .funcao-chip {
+    padding: 12px 12px;
+    font-size: 14px;
+  }
+
+  .cargos-lista {
+    grid-template-columns: 1fr;
+  }
+
+  .cargo-card {
+    min-height: 150px;
+  }
+
+  .cargo-slot {
+    font-size: 12px;
+  }
+}
