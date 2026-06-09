@@ -297,9 +297,18 @@ export default function SimuladorUrna({ onVoltar }) {
               </div>
             </div>
           ) : (
-            <div style={{ marginBottom: '8px' }}>
-              <div style={{ fontSize: '14px', fontWeight: '700', color: '#111' }}>{candidatoConf.nome}</div>
-              <div style={{ fontSize: '11px', color: '#555', marginTop: '2px' }}>{candidatoConf.partido}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+              {candidatoConf.foto && (
+                <img
+                  src={candidatoConf.foto}
+                  alt={candidatoConf.nome}
+                  className="display-foto-candidato"
+                />
+              )}
+              <div>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: '#111' }}>{candidatoConf.nome}</div>
+                <div style={{ fontSize: '11px', color: '#555', marginTop: '2px' }}>{candidatoConf.partido}</div>
+              </div>
             </div>
           )}
           <div className="display-instrucao">
