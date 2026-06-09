@@ -99,6 +99,7 @@
   overflow: hidden;
   box-shadow: inset 0 1px 4px rgba(0,0,0,0.08);
   min-height: 320px;
+  position: relative;
 }
 
 /* Linha do topo do display: data + TREINAMENTO */
@@ -225,6 +226,19 @@
 .display-instrucao b {
   color: #111;
   font-weight: 700;
+}
+
+.display-foto-candidato {
+  position: absolute;
+  top: 32px;
+  right: 0;
+  width: 120px;
+  height: 150px;
+  object-fit: cover;
+  object-position: top center;
+  border: 1.5px solid #555;
+  border-radius: 0;
+  background: #dde3ec;
 }
 
 .display-rodape {
