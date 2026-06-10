@@ -45,7 +45,8 @@ class ConteudoTeoria(Base):
     id = Column(Integer, primary_key=True, index=True)
     trilha_id = Column(Integer, ForeignKey("trilhas.id", ondelete="CASCADE"))
     titulo = Column(String)
-    ordem_modulo = Column(Integer, default=0) # NOVA COLUNA: Define a sequência do módulo na trilha
+    ordem_modulo = Column(Integer, default=0) # Define a sequência do módulo na trilha
+    tipo_conteudo = Column(String, default="teoria")  # 'teoria' ou 'pratica'
     
     # Relacionamento que traz os blocos do módulo específico ordenados
     blocos = relationship(
@@ -86,3 +87,13 @@ class ProgressoModulo(Base):
     user_email = Column(String, ForeignKey("users.email", ondelete="CASCADE"))
     trilha_id = Column(Integer, ForeignKey("trilhas.id", ondelete="CASCADE"))
     modulo_id = Column(Integer, ForeignKey("conteudos_teoria.id", ondelete="CASCADE"))
+
+class NoticiaJogo(Base):
+    __tablename__ = "noticias_jogo"
+
+    id = Column(Integer, primary_key=True, index=True)
+    modulo_id = Column(Integer, ForeignKey("conteudos_teoria.id", ondelete="CASCADE"))
+    ordem = Column(Integer, default=0)
+    imagem = Column(String, nullable=True)  # URL ou caminho da imagem
+    eh_fato = Column(Integer, default=1)  # 1 = verdadeira, 0 = falsa
+    explicacao = Column(Text)  # Explicação da resposta

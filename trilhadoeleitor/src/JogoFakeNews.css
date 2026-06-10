@@ -1,0 +1,236 @@
+/* Fundo da tela inteira (branco puro) */
+.game-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  padding: 20px;
+}
+
+/* Seção central (tom de branco levemente diferente/acinzentado com sombra suave) */
+.game-container {
+  background-color: #F8F9FA;
+  width: 100%;
+  max-width: 600px;
+  border-radius: 24px;
+  padding: 40px 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.game-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.game-header h1 {
+  font-size: 1.5rem;
+  color: #202124;
+  margin: 0 0 10px 0;
+}
+
+.game-header p {
+  font-size: 0.95rem;
+  color: #5F6368;
+  margin: 0;
+}
+
+.game-main {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  gap: 14px;
+}
+
+.news-counter {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: #475569;
+  background: #e2e8f0;
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+/* Textos indicadores abaixo/atrás do cartão */
+.drag-indicators {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.indicator-fake {
+  color: #D32F2F;
+  text-align: left;
+}
+
+.indicator-fact {
+  color: #388E3C;
+  text-align: right;
+}
+
+/* Estética do Quadrado inspirada na imagem de referência */
+.news-card {
+  width: min(100%, 420px);
+  aspect-ratio: 1 / 1;
+  min-height: 320px;
+  background-color: #E8EAF6; /* Fundo levemente azul/lilás simulando o card da imagem */
+  border: 2px solid #C5CAE9;
+  border-radius: 20px;
+  position: relative;
+  cursor: grab;
+  user-select: none;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+}
+
+.news-card:active {
+  cursor: grabbing;
+}
+
+/* Contêiner interno para a imagem da notícia */
+.image-placeholder {
+  width: 100%;
+  height: 100%;
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  color: #9AA0A6;
+  position: relative;
+  padding: 14px;
+  gap: 10px;
+}
+
+.news-card-label {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #1f2937;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  padding: 5px 10px;
+}
+
+.image-placeholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none; /* Evita bug nativo de arrastar imagem do navegador */
+  background-color: #FFFFFF;
+}
+
+.game-empty-state {
+  width: 100%;
+  padding: 20px;
+  text-align: center;
+  color: #64748b;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  background: #fff;
+}
+
+/* Sobreposição de cor (invisível por padrão) */
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: transparent;
+  z-index: 5;
+  transition: background-color 0.3s ease;
+  pointer-events: none;
+}
+
+/* Estados pós-resposta (FATO) */
+.news-card.result-fact {
+  border-color: #388E3C;
+}
+.news-card.result-fact .card-overlay {
+  background-color: rgba(56, 142, 60, 0.25); /* Verde meio transparente */
+}
+
+/* Estados pós-resposta (FAKE) */
+.news-card.result-fake {
+  border-color: #D32F2F;
+}
+.news-card.result-fake .card-overlay {
+  background-color: rgba(211, 47, 47, 0.25); /* Vermelho meio transparente */
+}
+
+/* Área de feedback inferior */
+.feedback-section {
+  width: 100%;
+  max-width: 400px;
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Retângulo de explicação */
+.explanation-box {
+  width: 100%;
+  padding: 15px 20px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 500;
+  color: #111;
+}
+
+.explanation-box.result-fact {
+  background-color: #E8F5E9;
+  border: 1px solid #A5D6A7;
+}
+
+.explanation-box.result-fake {
+  background-color: #FFEBEE;
+  border: 1px solid #EF9A9A;
+}
+
+/* Botão Próximo */
+.btn-next {
+  padding: 12px 32px;
+  background-color: #5C6BC0; /* Cor inspirada no roxo sutil da referência */
+  color: white;
+  border: none;
+  border-radius: 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-next:hover {
+  background-color: #3F51B5;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
