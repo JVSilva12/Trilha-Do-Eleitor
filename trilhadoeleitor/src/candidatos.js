@@ -27,44 +27,44 @@ export const CANDIDATOS_GOVERNADOR = {
 
 // ---- SENADOR ----
 export const CANDIDATOS_SENADOR = {
-  '130': { nome: 'Ana Paula Melo',      partido: 'PT'    },
-  '131': { nome: 'Carlos Bezerra Jr.',  partido: 'PT'    },
-  '221': { nome: 'Felipe Martins',      partido: 'PL'    },
-  '222': { nome: 'Coronel Meira',       partido: 'PL'    },
-  '451': { nome: 'Tasso Jereissati',    partido: 'PSDB'  },
-  '301': { nome: 'Alessandro Vieira',   partido: 'Novo'  },
-  '551': { nome: 'Otto Alencar Filho',  partido: 'PSD'   },
-  '501': { nome: 'Fabiano Contarato',   partido: 'PT'    },
-  '121': { nome: 'Weverton Rocha',      partido: 'PDT'   },
-  '141': { nome: 'Eduardo Bandeira',    partido: 'Missão'},
+  '131': { nome: 'Camilo Santana',      partido: 'PT',   foto: '/images/politicos/senadores/CamiloSantana.jpg'    },
+  '557': { nome: 'Carlos Bezerra Jr.',  partido: 'PSD',  foto: '/images/politicos/senadores/CarlosBezerraJr.jpg'    },
+  '221': { nome: 'Filipe Martins',      partido: 'PL',   foto: '/images/politicos/senadores/FilipeMartins.jpg'    },
+  '222': { nome: 'Coronel Meira',       partido: 'PL',   foto: '/images/politicos/senadores/CoronelMeira.jpg'       },
+  '456': { nome: 'Tasso Jereissati',    partido: 'PSDB', foto: '/images/politicos/senadores/TassoJereissati.jpg'  },
+  '451': { nome: 'Alessandro Vieira',   partido: 'PSDB', foto: '/images/politicos/senadores/AlessandroVieira.jpg'  },
+  '551': { nome: 'Otto Alencar Filho',  partido: 'PSD',  foto: '/images/politicos/senadores/OttoAlencarFilho.jpg'   },
+  '181': { nome: 'Fabiano Contarato',   partido: 'REDE', foto: '/images/politicos/senadores/FabianoContarato.jpg'    },
+  '121': { nome: 'Weverton Rocha',      partido: 'PDT',  foto: '/images/politicos/senadores/WevertonRocha.jpg'   },
+  '400': { nome: 'Eduardo Bandeira',    partido: 'PSB',  foto: '/images/politicos/senadores/EduardoBandeira.jpeg'},
 };
 
 // ---- DEPUTADO FEDERAL ----
 export const CANDIDATOS_DEP_FEDERAL = {
-  '1301': { nome: 'José Guimarães',       partido: 'PT'    },
-  '1302': { nome: 'Luizianne Lins',       partido: 'PT'    },
-  '2201': { nome: 'Carmelo Neto',         partido: 'PL'    },
-  '2202': { nome: 'Dr. Jaziel',           partido: 'PL'    },
-  '4501': { nome: 'Roberto Pessoa',       partido: 'PSDB'  },
-  '5001': { nome: 'Célia Xakriabá',       partido: 'PSOL'  },
-  '5501': { nome: 'Domingos Neto',        partido: 'PSD'   },
-  '3001': { nome: 'Marcel van Hattem',    partido: 'Novo'  },
-  '1201': { nome: 'André Figueiredo',     partido: 'PDT'   },
-  '4401': { nome: 'Danilo Forte',         partido: 'União' },
+  '1322': { nome: 'José Guimarães',       partido: 'PT',    foto: '/images/politicos/deputados_federais/JoseGuimaraes.jpeg'    },
+  '1313': { nome: 'Luizianne Lins',       partido: 'PT',    foto: '/images/politicos/deputados_federais/LuizianneLins.jpeg'    },
+  '1214': { nome: 'Eduardo Bismarck',     partido: 'PDT',   foto: '/images/politicos/deputados_federais/EduardoBismarck.jpg'     },
+  '2277': { nome: 'Jaziel Pereira',       partido: 'PL',    foto: '/images/politicos/deputados_federais/JazielPereira.jpg'       },
+  '4401': { nome: 'Roberto Pessoa',       partido: 'União', foto: '/images/politicos/deputados_federais/RobertoPessoa.jpg'  },
+  '5088': { nome: 'Célia Xakriabá',       partido: 'PSOL',  foto: '/images/politicos/deputados_federais/CeliaXakriaba.jpg'  },
+  '5555': { nome: 'Domingos Neto',        partido: 'PSD',   foto: '/images/politicos/deputados_federais/DomingosNeto.jpg'   },
+  '5511': { nome: 'Célio Studart',        partido: 'PSD',   foto: '/images/politicos/deputados_federais/CelioStudart.jpeg'  },
+  '1234': { nome: 'André Figueiredo',     partido: 'PDT',   foto: '/images/politicos/deputados_federais/AndreFigueiredo.jpg'   },
+  '4447': { nome: 'Danilo Forte',         partido: 'União', foto: '/images/politicos/deputados_federais/DaniloForte.jpeg' },
 };
 
 // ---- DEPUTADO ESTADUAL (Ceará) ----
 export const CANDIDATOS_DEP_ESTADUAL = {
-  '13001': { nome: 'Moisés Braz',           partido: 'PT'   },
-  '13002': { nome: 'Renato Roseno',         partido: 'PT'   },
-  '22001': { nome: 'Dra. Silvana',          partido: 'PL'   },
-  '22002': { nome: 'Delegado Cavalcante',   partido: 'PL'   },
-  '45001': { nome: 'Capitão Elias',         partido: 'PSDB' },
-  '50001': { nome: 'Augusta Brito',         partido: 'PSOL' },
-  '55001': { nome: 'Salmito Filho',         partido: 'PSD'  },
-  '30001': { nome: 'Coronel Aginaldo',      partido: 'Novo' },
-  '12001': { nome: 'Manoel Duca',           partido: 'PDT'  },
-  '16001': { nome: 'Professora Adriana',    partido: 'PSTU' },
+  '13333': { nome: 'Moisés Braz',           partido: 'PT',           foto: '/images/politicos/deputados_estaduais/MoisesBraz.jpeg'  },
+  '50500': { nome: 'Renato Roseno',         partido: 'PSOL',         foto: '/images/politicos/deputados_estaduais/RenatoRoseno.jpg'   },
+  '22011': { nome: 'Dra. Silvana',          partido: 'PL',           foto: '/images/politicos/deputados_estaduais/DraSilvana.jpg'   },
+  '22022': { nome: 'Carmelo Neto',          partido: 'PL',           foto: '/images/politicos/deputados_estaduais/CarmeloNeto.jpg'   },
+  '12144': { nome: 'Guilherme Bismarck',    partido: 'PDT',          foto: '/images/politicos/deputados_estaduais/GuilhermeBismarck.jpg' },
+  '65700': { nome: 'Augusta Brito',         partido: 'PCdoB',        foto: '/images/politicos/deputados_estaduais/AugustaBrito.jpg' },
+  '12500': { nome: 'Salmito Filho',         partido: 'PDT',          foto: '/images/politicos/deputados_estaduais/SalmitoFilho.jpeg'  },
+  '22112': { nome: 'Coronel Aginaldo',      partido: 'PL',           foto: '/images/politicos/deputados_estaduais/CoronelAginaldo.jpg' },
+  '10124': { nome: 'Manoel Duca',           partido: 'Republicanos', foto: '/images/politicos/deputados_estaduais/ManoelDuca.jpg'  },
+  '13013': { nome: 'Adriana Almeida',       partido: 'PT',           foto: '/images/politicos/deputados_estaduais/AdrianaAlmeida.jpeg' },
 };
 
 // ---- PREFEITO (Fortaleza) ----
