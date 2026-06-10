@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import logo from './assets/TDElogo.png';
 import fotoUrna from './assets/urna.png'; 
@@ -163,7 +163,8 @@ function TrilhaCardItem({ trilha, estaInscrito, imagemResolvida, emailUsuario, o
   }, [estaInscrito, trilha.id, emailUsuario]);
 
   const ehTrilhaUrna = trilha.imagem === 'urna';
-  const ehTrilhaProcesso = trilha.imagem === 'processo' || trilha.id === 2;
+  const ehTrilhaFakeNews = trilha.imagem === 'fakenews';
+  const temPraticaInterativa = ehTrilhaUrna || ehTrilhaFakeNews;
 
   return (
     <div className="trilha-card">
@@ -234,7 +235,9 @@ function TrilhaCardItem({ trilha, estaInscrito, imagemResolvida, emailUsuario, o
             </button>
             
             {/* BOTAO PRATICA — abre simulador na urna e atividade na trilha 2 */}
-            {ehTrilhaUrna || ehTrilhaProcesso ? (
+            
+            {/* BOTÃO PRÁTICA — abre a atividade interativa na trilha da urna e na de fake news */}
+            {temPraticaInterativa ? (
               <button
                 className="action-btn"
                 onClick={() => onVisualizarPratica(trilha.id, trilha.nome)}

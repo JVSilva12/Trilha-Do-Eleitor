@@ -86,6 +86,53 @@ async def lifespan(app: FastAPI):
             db.add_all(trilhas_padrao)
             db.commit()
             print("✓ Carga inicial das 3 trilhas padrão realizada com sucesso via Lifespan!")
+            
+            # Adiciona módulo com jogo fake news para a Trilha "Combate às Fake News" na seção de Prática
+            modulo_jogo = models.ConteudoTeoria(
+                trilha_id=3,  # Trilha "Combate às Fake News"
+                titulo="Detetive da Informação - Prática Interativa",
+                ordem_modulo=0,
+                tipo_conteudo="pratica"  # Tipo prática
+            )
+            db.add(modulo_jogo)
+            db.flush()  # Obtém o ID do módulo
+            
+            # Cria um bloco do tipo 'jogo' que renderizará o JogoFakeNews
+            bloco_jogo = models.BlocoTeoria(
+                teoria_id=modulo_jogo.id,
+                tipo="jogo",
+                valor="fake-news-detector",
+                ordem=0
+            )
+            db.add(bloco_jogo)
+            
+            # Adiciona notícias de exemplo para o jogo
+            noticias_exemplo = [
+                models.NoticiaJogo(
+                    modulo_id=modulo_jogo.id,
+                    ordem=1,
+                    imagem="https://via.placeholder.com/400x300?text=Noticia+1",
+                    eh_fato=1,
+                    explicacao="Esta notícia é um FATO. A urna eletrônica brasileira utiliza tecnologia de voto eletrônico desde 1996 e é considerada segura por especialistas internacionais."
+                ),
+                models.NoticiaJogo(
+                    modulo_id=modulo_jogo.id,
+                    ordem=2,
+                    imagem="https://via.placeholder.com/400x300?text=Noticia+2",
+                    eh_fato=0,
+                    explicacao="Esta notícia é FAKE. Não existem evidências científicas de que as urnas eletrônicas possam ser facilmente hackeadas. Os testes de segurança ocorrem regularmente."
+                ),
+                models.NoticiaJogo(
+                    modulo_id=modulo_jogo.id,
+                    ordem=3,
+                    imagem="https://via.placeholder.com/400x300?text=Noticia+3",
+                    eh_fato=1,
+                    explicacao="Esta notícia é um FATO. O voto impresso é uma medida adicional de segurança que foi implementada para aumentar ainda mais a confiança no processo eleitoral."
+                )
+            ]
+            db.add_all(noticias_exemplo)
+            db.commit()
+            print("✓ Módulo de jogo fake news adicionado à Trilha 'Urna Eletrônica'!")
     except Exception as e:
         print(f"❌ Falha crítica ao processar a carga semente do banco: {e}")
         db.rollback()
@@ -174,6 +221,17 @@ class QuizSchema(BaseModel):
     alternativa_c: str
     alternativa_d: str
     resposta_correta: str
+
+    class Config:
+        from_attributes = True
+
+class NoticiasJogoSchema(BaseModel):
+    id: Optional[int] = None
+    modulo_id: int
+    ordem: int
+    imagem: Optional[str] = None
+    eh_fato: int
+    explicacao: str
 
     class Config:
         from_attributes = True
@@ -553,6 +611,11 @@ def deletar_modulo_teoria(modulo_id: int, db: Session = Depends(database.get_db)
     db.delete(modulo)
     db.commit()
     return {"message": "Módulo teórico removido com sucesso!"}
+
+@app.get("/modulos/{modulo_id}/noticias-jogo", response_model=List[NoticiasJogoSchema], summary="Obtém as notícias do jogo fake news para um módulo")
+def obter_noticias_jogo(modulo_id: int, db: Session = Depends(database.get_db)):
+    noticias = db.query(models.NoticiaJogo).filter(models.NoticiaJogo.modulo_id == modulo_id).order_by(models.NoticiaJogo.ordem).all()
+    return noticias
 
 
 # =========================================================================

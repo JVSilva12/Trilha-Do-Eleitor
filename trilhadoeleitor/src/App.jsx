@@ -9,6 +9,7 @@ import NovaTrilha from './pages/conteudista/NovaTrilha.jsx';
 import PainelConteudista from './PainelConteudista';
 import VisualizarTeoria from './VisualizarTeoria';
 import VisualizarQuiz from './VisualizarQuiz';
+import VisualizarPratica from './VisualizarPratica';
 import SimuladorUrna from './SimuladorUrna';
 import AtividadeEleicoes from './AtividadeEleicoes';
 import musicaFundo from './assets/MorningRoutine.mp3';
@@ -144,13 +145,23 @@ function App() {
         />
       )}
 
-      {/* Simulador da Urna Eletrônica — prática exclusiva da trilha da urna */}
+      {/* Prática — renderiza componente específico por trilha */}
       {tela === 'ver-pratica' && (
-        trilhaVisualizacao.id === 2 ? (
-          <AtividadeEleicoes onVoltar={() => navegarPara('home')} />
-        ) : (
-          <SimuladorUrna onVoltar={() => navegarPara('home')} />
-        )
+        <>
+          {trilhaVisualizacao.id === 3 ? (
+            <VisualizarPratica 
+              trilhaId={trilhaVisualizacao.id}
+              trilhaNome={trilhaVisualizacao.nome}
+              emailUsuario={emailLogado}
+              audioFundo={audioRef}
+              onVoltar={() => navegarPara('home')}
+            />
+          ) : (
+            <SimuladorUrna
+              onVoltar={() => navegarPara('home')}
+            />
+          )}
+        </>
       )}
     </div>
   );
