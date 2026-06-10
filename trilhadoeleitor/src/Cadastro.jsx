@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from './api';
 import { useState } from 'react';
 import logo from './assets/TDElogo.png';
 import { UserIcon, MailIcon, LockIcon } from './Icons';
@@ -26,9 +26,9 @@ export default function Cadastro({ onSwitch }) {
     }
 
     try {
-      const response = await axios.post(
-        `http://localhost:8000/cadastro?apelido=${apelido}&email=${email}&password=${senha}`
-      );
+      await api.post('/cadastro', null, {
+        params: { apelido, email, password: senha }
+      });
       alert("Cadastrado com sucesso!");
       onSwitch();
     } catch (error) {

@@ -11,6 +11,7 @@ import VisualizarTeoria from './VisualizarTeoria';
 import VisualizarQuiz from './VisualizarQuiz';
 import VisualizarPratica from './VisualizarPratica';
 import SimuladorUrna from './SimuladorUrna';
+import AtividadeEleicoes from './AtividadeEleicoes';
 import musicaFundo from './assets/MorningRoutine.mp3';
 import somClique from './assets/clique.mp3';
 

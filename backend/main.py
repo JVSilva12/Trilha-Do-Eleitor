@@ -157,7 +157,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -267,7 +267,7 @@ def enviar_email_real(nome_usuario: str, email_usuario: str):
         mensagem["Subject"] = f"🔔 Nova Solicitação de Conteudista: {nome_usuario}"
 
         # Endereço absoluto local injetado com query parameters limpos para clique na mesma máquina
-        base_url = "http://localhost:8000/admin/aprovar"
+        base_url = "http://localhost:1234/admin/aprovar"
         link_aprovacao = f"{base_url}?email={email_usuario}"
 
         corpo_html = f"""
@@ -543,7 +543,7 @@ def upload_imagem_teoria(file: UploadFile = File(...)):
             shutil.copyfileobj(file.file, file_object)
             
         # CORREÇÃO: Inclusão explícita da porta :8000/ mapeada na rede localhost
-        return {"url_imagem": f"http://127.0.0.1:8000/{file_location}"}
+        return {"url_imagem": f"http://127.0.0.1:1234/{file_location}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -749,4 +749,4 @@ async def gerenciador_erros_global(request, exc):
 if __name__ == "__main__":
     import uvicorn
     # Executa a aplicação amarrada estritamente ao barramento local IPv4 de loopback
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("main:app", host="127.0.0.1", port=1234, reload=True)

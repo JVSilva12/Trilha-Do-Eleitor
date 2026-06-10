@@ -32,7 +32,7 @@ export default function EditarPerfil({ emailUsuario, onVoltar }) {
    async function carregarPerfil() {
      if (!emailUsuario) return;
      try {
-       const response = await axios.get(`http://localhost:8000/perfil/${emailUsuario}`);
+      const response = await axios.get(`http://localhost:1234/perfil/${emailUsuario}`);
        const dados = response.data;
        
        setApelido(dados.apelido || '');
@@ -42,7 +42,7 @@ export default function EditarPerfil({ emailUsuario, onVoltar }) {
        setDataCriacao(dados.data_criacao || '--/--/----');
        
        if (dados.foto_perfil) {
-         setFotoPerfil(`http://localhost:8000${dados.foto_perfil}`);
+         setFotoPerfil(`http://localhost:1234${dados.foto_perfil}`);
        } else {
          setFotoPerfil(null);
        }
@@ -83,7 +83,7 @@ export default function EditarPerfil({ emailUsuario, onVoltar }) {
        nova_senha: novaSenha || null 
      };
 
-     await axios.put(`http://localhost:8000/perfil/atualizar/${emailUsuario}`, payload);
+    await axios.put(`http://localhost:1234/perfil/atualizar/${emailUsuario}`, payload);
      alert("Perfil atualizado com sucesso!");
      
      setNomeExibicao(apelido.trim());
@@ -103,10 +103,10 @@ export default function EditarPerfil({ emailUsuario, onVoltar }) {
    formData.append("file", files[0]);
 
    try {
-     const response = await axios.post(`http://localhost:8000/perfil/${emailUsuario}/foto`, formData, {
+    const response = await axios.post(`http://localhost:1234/perfil/${emailUsuario}/foto`, formData, {
        headers: { 'Content-Type': 'multipart/form-data' }
      });
-     setFotoPerfil(`http://localhost:8000${response.data.foto_url}`);
+    setFotoPerfil(`http://localhost:1234${response.data.foto_url}`);
    } catch (error) {
      alert("Erro ao enviar foto.");
    }
@@ -115,7 +115,7 @@ export default function EditarPerfil({ emailUsuario, onVoltar }) {
  const handleRemoverFoto = async () => {
     if (!window.confirm("Deseja realmente remover sua foto de perfil?")) return;
     try {
-      await axios.delete(`http://localhost:8000/perfil/${emailUsuario}/foto`);
+      await axios.delete(`http://localhost:1234/perfil/${emailUsuario}/foto`);
       setFotoPerfil(null);
       alert("Foto removida!");
     } catch (error) {
