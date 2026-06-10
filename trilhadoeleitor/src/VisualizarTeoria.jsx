@@ -136,7 +136,9 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
             ? axios.get(`${API_URL}/trilhas/${trilhaId}/progresso/${emailUsuario}`).catch(() => ({ data: { concluidos_ids: [] } }))
             : Promise.resolve({ data: { concluidos_ids: [] } })
         ]);
-        setModulos(resModulos.data);
+        // Filtra apenas módulos de tipo 'teoria'
+        const modulosTeoria = resModulos.data.filter(mod => mod.tipo_conteudo === 'teoria' || !mod.tipo_conteudo);
+        setModulos(modulosTeoria);
         // O endpoint de progresso retorna concluidos_ids (lista de IDs lidos pelo usuário)
         const ids = resProgresso.data.concluidos_ids || [];
         setModulosLidos(new Set(ids));
@@ -149,6 +151,7 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
     }
     obterListaModulos();
   }, [trilhaId]);
+
 
   const handleCarregarModuloEspecifico = async (moduloId) => {
     try {
