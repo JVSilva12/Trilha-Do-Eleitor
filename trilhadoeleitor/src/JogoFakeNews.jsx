@@ -18,66 +18,66 @@ import './JogoFakeNews.css';
 const noticiasBase = [
   {
     id: 1,
-    title: 'Fake News 1',
+    title: 'Notícia 1',
     image: imagemFake,
     isFact: false,
-    explanation: 'Esta é uma FAKE NEWS. As informações foram manipuladas e desmentidas por agências de checagem de fatos.'
+    explanation: 'Esta é uma FAKE NEWS. A notícia é falsa porque apresenta uma data de publicação impossível (31 de fevereiro) com erros cronológicos. Além disso, a foto foi claramente gerada por Inteligência Artificial, exibindo deformidades nas mãos e objetos, e retrata um encontro irreal.'
   },
   {
     id: 2,
-    title: 'Fake News 2',
+    title: 'Notícia 2',
     image: imagemFake2,
     isFact: false,
-    explanation: 'Esta é uma FAKE NEWS. Desinformação comum que circula em redes sociais sobre eleições.'
+    explanation: 'Esta é uma FAKE NEWS. A imagem central possui erros óbvios de geração por IA, como a cena absurda de um caminhão dentro de uma sala de aula e a bandeira boliviana distorcida.'
   },
   {
     id: 3,
-    title: 'Fake News 3',
+    title: 'Notícia 3',
     image: imagemFake3,
     isFact: false,
-    explanation: 'Esta é uma FAKE NEWS. Imagem manipulada e contexto alterado propositalmente.'
+    explanation: 'Esta é uma FAKE NEWS. A barra lateral "Mais Lidas" utiliza o mesmo template genérico e repetitivo visto em outras montagens fraudulentas. Além disso, o texto finaliza com um erro de digitação amador para um portal profissional, escrevendo a palavra "horass".'
   },
   {
     id: 4,
-    title: 'Fake News 4',
+    title: 'Notícia 4',
     image: imagemFake4,
     isFact: false,
-    explanation: 'Esta é uma FAKE NEWS. Conteúdo falso que visa enganar eleitores.'
+    explanation: 'Esta é uma FAKE NEWS. A legenda da imagem escancara a fraude ao iniciar com a frase confessional "Segue legenda para enganar". Além disso, a barra lateral de mais lidas comete o erro grosseiro de repetir o número "4" e a mesma manchete duas vezes.'
   },
   {
     id: 5,
-    title: 'Fake News 5',
+    title: 'Notícia 5',
     image: imagemFake5,
     isFact: false,
-    explanation: 'Esta é uma FAKE NEWS. Informação verificada como falsa por múltiplos fact-checkers.'
+    explanation: 'Esta é uma FAKE NEWS. Essa imagem é uma montagem evidente, a começar pelo logotipo "TWERDESMARES" (uma paródia rústica da TV Verdes Mares) e o botão de login "Conta Globinho". A matéria é assinada por "Autor desconhecido" e a manchete contém um erro de digitação bizarro ("eva política" em vez de "era").'
   },
   {
     id: 6,
-    title: 'Verdade 1',
+    title: 'Notícia 6',
     image: imagemVerdade,
     isFact: true,
     explanation: 'Esta é uma VERDADE. Informação verificada e confirmada por fontes oficiais confiáveis.'
   },
   {
     id: 7,
-    title: 'Verdade 2',
+    title: 'Notícia 7',
     image: imagemVerdade2,
     isFact: true,
-    explanation: 'Esta é uma VERDADE. Fato confirmado sobre o processo eleitoral brasileiro.'
+    explanation: 'Esta é uma VERDADE. Diferente dos exemplos anteriores, esta imagem exibe a formatação autêntica e consistente do portal Metrópoles, sem repetições anômalas ou textos genéricos nas barras laterais. A matéria é assinada por um colunista político real e conhecido (Igor Gadelha), e as datas de publicação e atualização possuem coerência cronológica. Além disso, a fotografia apresenta os devidos créditos e não exibe as distorções anatômicas ou texturas irreais típicas de imagens geradas por Inteligência Artificial.'
   },
   {
     id: 8,
-    title: 'Verdade 3',
+    title: 'Notícia 8',
     image: imagemVerdade3,
     isFact: true,
-    explanation: 'Esta é uma VERDADE. Informação comprovada e documentada oficialmente.'
+    explanation: 'Esta é uma VERDADE. Informação comprovada e documentada oficialmente, embora a manchete traga informações tendenciosas com o intúito de compartilhamento.'
   },
   {
     id: 9,
-    title: 'Verdade 4',
+    title: 'Notícia 9',
     image: imagemVerdade4,
     isFact: true,
-    explanation: 'Esta é uma VERDADE. Dado verificado por especialistas e instituições reconhecidas.'
+    explanation: 'Esta é uma VERDADE. Dado verificado por especialistas e instituições reconhecidas. Esse acontecimento realmente aconteceu em 2023.'
   }
 ];
 
