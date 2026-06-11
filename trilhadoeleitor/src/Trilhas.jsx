@@ -164,7 +164,8 @@ function TrilhaCardItem({ trilha, estaInscrito, imagemResolvida, emailUsuario, o
 
   const ehTrilhaUrna = trilha.imagem === 'urna';
   const ehTrilhaFakeNews = trilha.imagem === 'fakenews';
-  const temPraticaInterativa = ehTrilhaUrna || ehTrilhaFakeNews;
+  const ehTrilhaProcessoEleitoral = trilha.imagem === 'processo' || trilha.id === 2;
+  const temPraticaInterativa = ehTrilhaUrna || ehTrilhaFakeNews || ehTrilhaProcessoEleitoral;
 
   return (
     <div className="trilha-card">
