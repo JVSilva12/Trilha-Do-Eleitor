@@ -133,6 +133,27 @@ async def lifespan(app: FastAPI):
             db.add_all(noticias_exemplo)
             db.commit()
             print("✓ Módulo de jogo fake news adicionado à Trilha 'Urna Eletrônica'!")
+            
+            # Adiciona módulo com atividade de cargos para a Trilha "Processo Eleitoral" na seção de Prática
+            modulo_cargos = models.ConteudoTeoria(
+                trilha_id=2,  # Trilha "Processo Eleitoral"
+                titulo="Conhecendo os Cargos Públicos",
+                ordem_modulo=0,
+                tipo_conteudo="pratica"  # Tipo prática
+            )
+            db.add(modulo_cargos)
+            db.flush()  # Obtém o ID do módulo
+            
+            # Cria um bloco do tipo 'cargos' que renderizará a AtividadeEleicoes
+            bloco_cargos = models.BlocoTeoria(
+                teoria_id=modulo_cargos.id,
+                tipo="cargos",
+                valor="matching-cargos-funcoes",
+                ordem=0
+            )
+            db.add(bloco_cargos)
+            db.commit()
+            print("✓ Módulo de atividade de cargos adicionado à Trilha 'Processo Eleitoral'!")
     except Exception as e:
         print(f"❌ Falha crítica ao processar a carga semente do banco: {e}")
         db.rollback()

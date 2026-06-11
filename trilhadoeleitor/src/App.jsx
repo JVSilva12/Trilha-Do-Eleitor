@@ -148,7 +148,7 @@ function App() {
       {/* Prática — renderiza componente específico por trilha */}
       {tela === 'ver-pratica' && (
         <>
-          {trilhaVisualizacao.id === 3 ? (
+          {trilhaVisualizacao.id === 2 || trilhaVisualizacao.id === 3 ? (
             <VisualizarPratica 
               trilhaId={trilhaVisualizacao.id}
               trilhaNome={trilhaVisualizacao.nome}

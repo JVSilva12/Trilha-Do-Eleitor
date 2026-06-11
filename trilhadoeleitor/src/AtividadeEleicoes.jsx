@@ -130,7 +130,7 @@ function CargoDrop({ cargo, item, isResolvido }) {
   );
 }
 
-export default function AtividadeEleicoes({ onVoltar }) {
+export default function AtividadeEleicoes({ onVoltar, trilhaNome, moduloNome, showHeader = true }) {
   const [disponiveis, setDisponiveis] = useState(() => embaralhar(FUNCOES.map((f) => f.id)));
   const [atribuidas, setAtribuidas] = useState({});
   const [dica, setDica] = useState('');
@@ -196,16 +196,18 @@ export default function AtividadeEleicoes({ onVoltar }) {
 
   return (
     <div className="atividade-eleicoes">
-      <header className="atividade-header">
-        <div>
-          <h1>Atividade Interativa</h1>
-          <p>Trilha 2 • Como funcionam as eleicoes</p>
-        </div>
-        <div className="header-actions">
-          <button type="button" className="btn-outline" onClick={onVoltar}>Voltar</button>
-          <button type="button" className="btn-primary" onClick={reiniciar}>Reembaralhar</button>
-        </div>
-      </header>
+      {showHeader && (
+        <header className="atividade-header">
+          <div>
+            <h1>Atividade Interativa</h1>
+            <p>{trilhaNome ? `${trilhaNome}${moduloNome ? ` • ${moduloNome}` : ''}` : 'Trilha 2 • Como funcionam as eleicoes'}</p>
+          </div>
+          <div className="header-actions">
+            <button type="button" className="btn-outline" onClick={onVoltar}>Voltar</button>
+            <button type="button" className="btn-primary" onClick={reiniciar}>Reembaralhar</button>
+          </div>
+        </header>
+      )}
 
       <section className="atividade-intro">
         <p>
