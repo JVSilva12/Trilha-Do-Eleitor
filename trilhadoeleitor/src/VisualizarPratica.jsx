@@ -10,7 +10,7 @@ const API_URL = "http://127.0.0.1:1234";
 export default function VisualizarPratica({ trilhaId, trilhaNome, onVoltar, audioFundo }) {
   const [modulos, setModulos] = useState([]);
   const [moduloSelecionado, setModuloSelecionado] = useState(null);
-  const [noticiasJogo, setNoticiasJogo] = useState(null);
+  // const [noticiasJogo, setNoticiasJogo] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(false);
 
@@ -46,21 +46,21 @@ export default function VisualizarPratica({ trilhaId, trilhaNome, onVoltar, audi
       setModuloSelecionado(response.data);
 
       // Verifica se o módulo tem um bloco do tipo 'jogo' e carrega as notícias
-      if (response.data.blocos && response.data.blocos.some(bloco => bloco.tipo === 'jogo')) {
-        try {
-          const noticiasResponse = await axios.get(`${API_URL}/modulos/${moduloId}/noticias-jogo`);
-          const noticiasFormatadas = noticiasResponse.data.map(noticia => ({
-            id: noticia.id,
-            image: noticia.imagem,
-            isFact: noticia.eh_fato === 1,
-            explanation: noticia.explicacao
-          }));
-          setNoticiasJogo(noticiasFormatadas.length > 0 ? noticiasFormatadas : null);
-        } catch (err) {
-          console.error("Erro ao carregar notícias do jogo:", err);
-          setNoticiasJogo(null);
-        }
-      }
+      // if (response.data.blocos && response.data.blocos.some(bloco => bloco.tipo === 'jogo')) {
+      //   try {
+      //     const noticiasResponse = await axios.get(`${API_URL}/modulos/${moduloId}/noticias-jogo`);
+      //     const noticiasFormatadas = noticiasResponse.data.map(noticia => ({
+      //       id: noticia.id,
+      //       image: noticia.imagem,
+      //       isFact: noticia.eh_fato === 1,
+      //       explanation: noticia.explicacao
+      //     }));
+      //     setNoticiasJogo(noticiasFormatadas.length > 0 ? noticiasFormatadas : null);
+      //   } catch (err) {
+      //     console.error("Erro ao carregar notícias do jogo:", err);
+      //     setNoticiasJogo(null);
+      //   }
+      //}
     } catch (err) {
       alert("Erro ao abrir a atividade de prática.");
       console.error(err);
@@ -137,8 +137,7 @@ export default function VisualizarPratica({ trilhaId, trilhaNome, onVoltar, audi
                     </div>
                   </header>
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 6vw', background: 'radial-gradient(circle at top left, #fef3c7 0%, #f8fafc 45%, #ecfeff 100%)' }}>
-                    <JogoFakeNews 
-                      newsData={noticiasJogo}
+                   <JogoFakeNews 
                       titulo="Detetive da Informação"
                       descricao="Teste suas habilidades: arraste a notícia e descubra se é verdadeira ou falsa."
                     />
@@ -254,7 +253,6 @@ export default function VisualizarPratica({ trilhaId, trilhaNome, onVoltar, audi
                       return (
                         <div key={idx} className="aula-jogo-section" style={{ margin: '20px 0', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
                           <JogoFakeNews 
-                            newsData={noticiasJogo}
                             titulo="Detetive da Informação"
                             descricao="Teste suas habilidades: arraste a notícia e descubra se é verdadeira ou falsa."
                           />
