@@ -1,33 +1,98 @@
 import { useState, useRef } from 'react';
-import imagemNoticia1 from './assets/Noticia1.png';
+import imagemFake from './assets/Fake.png';
+import imagemFake2 from './assets/Fake (2).png';
+import imagemFake3 from './assets/Fake (3).png';
+import imagemFake4 from './assets/Fake (4).png';
+import imagemFake5 from './assets/Fake (5).png';
+import imagemVerdade from './assets/Verdade.png';
+import imagemVerdade2 from './assets/Verdade (2).png';
+import imagemVerdade3 from './assets/Verdade (3).png';
+import imagemVerdade4 from './assets/Verdade (4).png';
 import imagemFakeNewsPadrao from './assets/Noticia2.png';
-import imagemFake from './assets/fakenews.png';
 import './JogoFakeNews.css';
 
-// Dados simulados para o jogo
-const mockNewsData = [
+// ========================================================================
+// DADOS DAS NOTÍCIAS - 9 IMAGENS (5 FAKES + 4 VERDADES)
+// ========================================================================
+// Ordem será sempre aleatória
+const noticiasBase = [
   {
     id: 1,
-    title: 'Notícia 1',
-    image: imagemNoticia1,
-    isFact: true,
-    explanation: 'Esta notícia é um FATO. Os dados foram confirmados por fontes oficiais de saúde.'
+    title: 'Fake News 1',
+    image: imagemFake,
+    isFact: false,
+    explanation: 'Esta é uma FAKE NEWS. As informações foram manipuladas e desmentidas por agências de checagem de fatos.'
   },
   {
     id: 2,
-    title: 'Notícia 2',
-    image: imagemFakeNewsPadrao,
+    title: 'Fake News 2',
+    image: imagemFake2,
     isFact: false,
-    explanation: 'Esta notícia é FAKE. A imagem foi manipulada e a informação desmentida por agências de checagem.'
+    explanation: 'Esta é uma FAKE NEWS. Desinformação comum que circula em redes sociais sobre eleições.'
   },
   {
     id: 3,
-    title: 'Notícia 3',
-    image: imagemFake,
+    title: 'Fake News 3',
+    image: imagemFake3,
     isFact: false,
-    explanation: 'Exemplo adicional usando a imagem padrão.'
+    explanation: 'Esta é uma FAKE NEWS. Imagem manipulada e contexto alterado propositalmente.'
+  },
+  {
+    id: 4,
+    title: 'Fake News 4',
+    image: imagemFake4,
+    isFact: false,
+    explanation: 'Esta é uma FAKE NEWS. Conteúdo falso que visa enganar eleitores.'
+  },
+  {
+    id: 5,
+    title: 'Fake News 5',
+    image: imagemFake5,
+    isFact: false,
+    explanation: 'Esta é uma FAKE NEWS. Informação verificada como falsa por múltiplos fact-checkers.'
+  },
+  {
+    id: 6,
+    title: 'Verdade 1',
+    image: imagemVerdade,
+    isFact: true,
+    explanation: 'Esta é uma VERDADE. Informação verificada e confirmada por fontes oficiais confiáveis.'
+  },
+  {
+    id: 7,
+    title: 'Verdade 2',
+    image: imagemVerdade2,
+    isFact: true,
+    explanation: 'Esta é uma VERDADE. Fato confirmado sobre o processo eleitoral brasileiro.'
+  },
+  {
+    id: 8,
+    title: 'Verdade 3',
+    image: imagemVerdade3,
+    isFact: true,
+    explanation: 'Esta é uma VERDADE. Informação comprovada e documentada oficialmente.'
+  },
+  {
+    id: 9,
+    title: 'Verdade 4',
+    image: imagemVerdade4,
+    isFact: true,
+    explanation: 'Esta é uma VERDADE. Dado verificado por especialistas e instituições reconhecidas.'
   }
 ];
+
+// Função para embaralhar array
+const embaralhar = (array) => {
+  const novo = [...array];
+  for (let i = novo.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [novo[i], novo[j]] = [novo[j], novo[i]];
+  }
+  return novo;
+};
+
+// Embaralha as notícias sempre que o jogo inicia
+const mockNewsData = embaralhar(noticiasBase);
 
 const JogoFakeNews = ({ newsData = null, onGameComplete = null, titulo = "Detetive da Informação", descricao = "Teste suas habilidades: arraste a notícia e descubra se é verdadeira ou falsa." }) => {
   const gameData = Array.isArray(newsData) && newsData.length > 0 ? newsData : mockNewsData;
