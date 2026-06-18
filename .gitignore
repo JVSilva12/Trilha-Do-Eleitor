@@ -1,12 +1,22 @@
 # Ambientes virtuais e pacotes (NUNCA enviar para o Git)
 venv/
 node_modules/
+backend/node_modules/
+
+# Cache Python
+__pycache__/
+*.pyc
+backend/__pycache__/
 
 # Banco de dados local (cada colega deve ter o seu próprio banco de testes)
 backend/usuarios.db
+*.db
 
 # Arquivos de sistema e cache
-__pycache__/
 .DS_Store
 dist/
 .env
+backend/.env
+backend/uploads/
+uploads/
+trilhadoeleitor/dist/

@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import api from './api';
 import { ArrowLeftIcon, BookOpenIcon, FileTextIcon } from './Icons';
 import './VisualizarTeoria.css';
-
-const API_URL = "http://127.0.0.1:1234";
 
 // Converte qualquer URL do YouTube ou Vimeo para URL de embed.
 // Para YouTube, adiciona ?enablejsapi=1 para detecção de eventos via postMessage.
@@ -131,9 +129,9 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
         setCarregando(true);
         setErro(false);
         const [resModulos, resProgresso] = await Promise.all([
-          axios.get(`${API_URL}/trilhas/${trilhaId}/modulos`),
+          api.get(`/trilhas/${trilhaId}/modulos`),
           emailUsuario
-            ? axios.get(`${API_URL}/trilhas/${trilhaId}/progresso/${emailUsuario}`).catch(() => ({ data: { concluidos_ids: [] } }))
+            ? api.get(`/trilhas/${trilhaId}/progresso/${emailUsuario}`).catch(() => ({ data: { concluidos_ids: [] } }))
             : Promise.resolve({ data: { concluidos_ids: [] } })
         ]);
         // Filtra apenas módulos de tipo 'teoria'
@@ -156,7 +154,7 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
   const handleCarregarModuloEspecifico = async (moduloId) => {
     try {
       setCarregando(true);
-      const response = await axios.get(`${API_URL}/modulos/${moduloId}`);
+      const response = await api.get(`/modulos/${moduloId}`);
       setModuloSelecionado(response.data);
     } catch (err) {
       alert("Erro ao abrir os blocos didáticos deste capítulo.");
@@ -168,7 +166,7 @@ export default function VisualizarTeoria({ trilhaId, trilhaNome, onVoltar, email
   const handleRetornarAoSumario = async () => {
     if (moduloSelecionado && moduloSelecionado.id && emailUsuario) {
       try {
-        await axios.post(`${API_URL}/trilhas/${trilhaId}/concluir-modulo/${moduloSelecionado.id}?email=${emailUsuario}`);
+        await api.post(`/trilhas/${trilhaId}/concluir-modulo/${moduloSelecionado.id}?email=${emailUsuario}`);
         // Marca o módulo como lido localmente para atualizar os ícones imediatamente
         setModulosLidos(prev => new Set([...prev, moduloSelecionado.id]));
       } catch (err) {

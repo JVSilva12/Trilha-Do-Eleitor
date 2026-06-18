@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import { useCallback, useEffect, useState } from 'react';
+import { API_URL } from '../../api';
 import ModuloCard from '../../components/Trilhas/ModuloCard';
 import StatusBadge from '../../components/Trilhas/StatusBadge';
 import {
@@ -209,7 +210,7 @@ export default function EditarTrilha() {
       </div>
 
       <article className="resumo-trilha-card resumo-trilha-fino">
-        <img src={trilha.imagem} alt={trilha.nome} />
+        <img src={trilha.imagem && trilha.imagem.startsWith('/') ? `${API_URL}${trilha.imagem}` : trilha.imagem} alt={trilha.nome} />
 
         <div className="resumo-grid">
           <div>
