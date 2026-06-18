@@ -1,13 +1,14 @@
 import React from 'react';
-import { PencilIcon, TrashIcon } from '../../Icons'; 
+import { API_URL } from '../../api';
+import { PencilIcon, TrashIcon } from '../../Icons';
 
 // Importação das fotos nativas do projeto para o casamento de assets
-import fotoUrna from '../../assets/urna.png'; 
-import fotoProcesso from '../../assets/processo.png'; 
-import fotoFakeNews from '../../assets/fakenews.png'; 
+import fotoUrna from '../../assets/urna.png';
+import fotoProcesso from '../../assets/processo.png';
+import fotoFakeNews from '../../assets/fakenews.png';
 
 export default function TrilhaCard({ trilha, onExcluir, onEditar }) {
-  
+
   // Resolve dinamicamente se usa a foto local do projeto ou o link externo cadastrado
   const mapearImagemTrilha = (imagemInformada) => {
     if (imagemInformada === 'urna') return fotoUrna;
@@ -15,6 +16,9 @@ export default function TrilhaCard({ trilha, onExcluir, onEditar }) {
     if (imagemInformada === 'fakenews') return fotoFakeNews;
     if (imagemInformada && (imagemInformada.startsWith('http') || imagemInformada.startsWith('data:'))) {
       return imagemInformada;
+    }
+    if (imagemInformada && imagemInformada.startsWith('/')) {
+      return `${API_URL}${imagemInformada}`;
     }
     return null; // Fallback para gradiente se não houver imagem
   };
@@ -52,16 +56,16 @@ export default function TrilhaCard({ trilha, onExcluir, onEditar }) {
   return (
     <div className="perfil-card" style={{ display: 'flex', flexDirection: 'column', padding: '16px', gap: '12px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%', gap: '16px' }}>
-        
+
         {/* Bloco da Esquerda: Imagem + Textos Informativos */}
         <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', flex: 1 }}>
-          
+
           {/* NOVO ELEMENTO VISUAL: Miniatura da Trilha */}
-          <div style={{ 
-            width: '64px', 
-            height: '64px', 
-            borderRadius: '8px', 
-            overflow: 'hidden', 
+          <div style={{
+            width: '64px',
+            height: '64px',
+            borderRadius: '8px',
+            overflow: 'hidden',
             flexShrink: 0,
             border: '1px solid #e2e8f0',
             background: 'linear-gradient(135deg, #e2e8f0, #cbd5e1)'
@@ -88,16 +92,16 @@ export default function TrilhaCard({ trilha, onExcluir, onEditar }) {
 
         {/* Menu de Ações Lógicas (Lápis e Lixeira) */}
         <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-          <button 
-            className="edit-avatar-btn" 
+          <button
+            className="edit-avatar-btn"
             title="Editar Conteúdo"
             style={{ position: 'static', width: '32px', height: '32px' }}
             onClick={() => onEditar(trilha.id)}
           >
             <PencilIcon />
           </button>
-          <button 
-            className="remove-avatar-btn" 
+          <button
+            className="remove-avatar-btn"
             title="Excluir Trilha"
             style={{ position: 'static', width: '32px', height: '32px' }}
             onClick={() => onExcluir(trilha.id)}
@@ -108,12 +112,12 @@ export default function TrilhaCard({ trilha, onExcluir, onEditar }) {
       </div>
 
       {/* Rodapé Cronológico Automatizado */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        fontSize: '11px', 
-        color: '#94a3b8', 
-        borderTop: '1px solid #f1f5f9', 
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        fontSize: '11px',
+        color: '#94a3b8',
+        borderTop: '1px solid #f1f5f9',
         paddingTop: '8px',
         marginTop: '4px'
       }}>

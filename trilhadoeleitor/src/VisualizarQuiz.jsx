@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from './api';
 import { ArrowLeftIcon, CheckIcon, TrashIcon } from './Icons';
 import './VisualizarQuiz.css';
 import somAplausos from './assets/aplausos.mp3';
-
-const API_URL = "http://127.0.0.1:1234";
 
 export default function VisualizarQuiz({ trilhaId, trilhaNome, onVoltar }) {
   const [perguntas, setPerguntas] = useState([]);
@@ -20,7 +18,7 @@ export default function VisualizarQuiz({ trilhaId, trilhaNome, onVoltar }) {
       if (!trilhaId) return;
       try {
         setCarregando(true);
-        const response = await axios.get(`${API_URL}/trilhas/${trilhaId}/quiz`);
+        const response = await api.get(`/trilhas/${trilhaId}/quiz`);
         setPerguntas(response.data);
       } catch (err) {
         console.error("Erro ao carregar o quiz:", err);
