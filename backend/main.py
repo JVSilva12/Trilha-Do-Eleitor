@@ -1,40 +1,40 @@
 import os
-import re
 import shutil
+import re
 import smtplib
-from contextlib import asynccontextmanager
 from datetime import datetime
-from email.mime.multipart import MIMEMultipart
+from contextlib import asynccontextmanager
 from email.mime.text import MIMEText
-from typing import List, Optional
-
-from fastapi import BackgroundTasks, Depends, FastAPI, File, HTTPException, UploadFile
-from fastapi.middleware.cors import CORSMiddleware
+from email.mime.multipart import MIMEMultipart
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, BackgroundTasks
 from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
-from pwdlib import PasswordHash
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from typing import Optional, List
+import models, database
+from pwdlib import PasswordHash
 
-import database
-import models
+# =========================================================================
+# 1. INICIALIZAÇÃO DE DIRETÓRIOS E CONFIGURAÇÕES DE AMBIENTE LOCAL
+# =========================================================================
 
-try:
-    from dotenv import load_dotenv
-except ImportError:
-    def load_dotenv():
-        return None
+# Garante a existência do diretório de uploads local na máquina do desenvolvedor
+os.makedirs("uploads", exist_ok=True)
 
-load_dotenv()
-
-UPLOAD_DIR = os.getenv("UPLOAD_DIR", "uploads")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+# Motor padrão recomendado pelo FastAPI para criptografia e verificação de senhas (Argon2)
 password_hash = PasswordHash.recommended()
-EMAIL_ADM = os.getenv("EMAIL_ADM")
-EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/")
-BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:1234").rstrip("/")
 
+# Configurações Oficiais de Credenciais do E-mail Administrativo do Grupo
+EMAIL_ADM = "trilhadoeleitor.adm@gmail.com"
+# Token estrito de 16 letras de segurança gerado pelo painel de senhas de app do Google
+EMAIL_PASSWORD = "qyld xtgg nijt vids" 
+
+
+# =========================================================================
+# 2. GERENCIADOR DE CICLO DE VIDA (LIFESPAN) - SUBSTITUI O ANTIGO STARTUP
+# =========================================================================
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -42,12 +42,15 @@ async def lifespan(app: FastAPI):
     Controlador reativo do ciclo de vida da aplicação FastAPI.
     Garante o mapeamento inicial de DDL e a injeção do banco pedagógico inicial.
     """
+    # Cria fisicamente as tabelas mapeadas no models.py dentro do arquivo usuarios.db se não existirem
     models.Base.metadata.create_all(bind=database.engine)
-
+    
+    # Estabelece uma sessão isolada temporária para a carga semente de dados (Seed)
     db = database.SessionLocal()
     try:
         total_trilhas = db.query(models.Trilha).count()
         if total_trilhas == 0:
+            print("→ Banco de dados vazio detectado. Iniciando injeção semente de trilhas...")
             trilhas_padrao = [
                 models.Trilha(
                     id=1,
@@ -57,7 +60,7 @@ async def lifespan(app: FastAPI):
                     nivel="Básico",
                     imagem="urna",
                     status="publicada",
-                    visibilidade="Pública",
+                    visibilidade="Pública"
                 ),
                 models.Trilha(
                     id=2,
@@ -67,7 +70,7 @@ async def lifespan(app: FastAPI):
                     nivel="Intermediário",
                     imagem="processo",
                     status="publicada",
-                    visibilidade="Pública",
+                    visibilidade="Pública"
                 ),
                 models.Trilha(
                     id=3,
@@ -77,71 +80,76 @@ async def lifespan(app: FastAPI):
                     nivel="Avançado",
                     imagem="fakenews",
                     status="publicada",
-                    visibilidade="Pública",
-                ),
+                    visibilidade="Pública"
+                )
             ]
             db.add_all(trilhas_padrao)
             db.commit()
             print("✓ Carga inicial das 3 trilhas padrão realizada com sucesso via Lifespan!")
-
+            
+            # Adiciona módulo com jogo fake news para a Trilha "Combate às Fake News" na seção de Prática
             modulo_jogo = models.ConteudoTeoria(
-                trilha_id=3,
+                trilha_id=3,  # Trilha "Combate às Fake News"
                 titulo="Detetive da Informação - Prática Interativa",
                 ordem_modulo=0,
-                tipo_conteudo="pratica",
+                tipo_conteudo="pratica"  # Tipo prática
             )
             db.add(modulo_jogo)
-            db.flush()
-
+            db.flush()  # Obtém o ID do módulo
+            
+            # Cria um bloco do tipo 'jogo' que renderizará o JogoFakeNews
             bloco_jogo = models.BlocoTeoria(
                 teoria_id=modulo_jogo.id,
                 tipo="jogo",
                 valor="fake-news-detector",
-                ordem=0,
+                ordem=0
             )
             db.add(bloco_jogo)
-
+            
+            # Adiciona notícias de exemplo para o jogo
             noticias_exemplo = [
                 models.NoticiaJogo(
                     modulo_id=modulo_jogo.id,
                     ordem=1,
                     imagem="https://via.placeholder.com/400x300?text=Noticia+1",
                     eh_fato=1,
-                    explicacao="Esta notícia é um FATO. A urna eletrônica brasileira utiliza tecnologia de voto eletrônico desde 1996 e é considerada segura por especialistas internacionais.",
+                    explicacao="Esta notícia é um FATO. A urna eletrônica brasileira utiliza tecnologia de voto eletrônico desde 1996 e é considerada segura por especialistas internacionais."
                 ),
                 models.NoticiaJogo(
                     modulo_id=modulo_jogo.id,
                     ordem=2,
                     imagem="https://via.placeholder.com/400x300?text=Noticia+2",
                     eh_fato=0,
-                    explicacao="Esta notícia é FAKE. Não existem evidências científicas de que as urnas eletrônicas possam ser facilmente hackeadas. Os testes de segurança ocorrem regularmente.",
+                    explicacao="Esta notícia é FAKE. Não existem evidências científicas de que as urnas eletrônicas possam ser facilmente hackeadas. Os testes de segurança ocorrem regularmente."
                 ),
                 models.NoticiaJogo(
                     modulo_id=modulo_jogo.id,
                     ordem=3,
                     imagem="https://via.placeholder.com/400x300?text=Noticia+3",
                     eh_fato=1,
-                    explicacao="Esta notícia é um FATO. O voto impresso é uma medida adicional de segurança que foi implementada para aumentar ainda mais a confiança no processo eleitoral.",
-                ),
+                    explicacao="Esta notícia é um FATO. O voto impresso é uma medida adicional de segurança que foi implementada para aumentar ainda mais a confiança no processo eleitoral."
+                )
             ]
             db.add_all(noticias_exemplo)
             db.commit()
             print("✓ Módulo de jogo fake news adicionado à Trilha 'Urna Eletrônica'!")
-
+            
+            # Adiciona módulo com atividade de cargos para a Trilha "Processo Eleitoral" na seção de Prática
             modulo_cargos = models.ConteudoTeoria(
-                trilha_id=2,
+                trilha_id=2,  # Trilha "Processo Eleitoral"
                 titulo="Conhecendo os Cargos Públicos",
                 ordem_modulo=0,
-                tipo_conteudo="pratica",
+                tipo_conteudo="pratica"  # Tipo prática
             )
             db.add(modulo_cargos)
-            db.flush()
-
+            db.flush()  # Obtém o ID do módulo
+            
+            # Cria um bloco do tipo 'cargos' que renderizará a AtividadeEleicoes
             bloco_cargos = models.BlocoTeoria(
                 teoria_id=modulo_cargos.id,
                 tipo="cargos",
                 valor="matching-cargos-funcoes",
-                ordem=0,
+                ordem=0
             )
             db.add(bloco_cargos)
             db.commit()
@@ -151,20 +159,26 @@ async def lifespan(app: FastAPI):
         db.rollback()
     finally:
         db.close()
+        
+    yield # Divide o momento da inicialização do encerramento físico do servidor uvicorn
 
-    yield
 
-
+# Inicialização formal do FastAPI injetando o manipulador de contexto assíncrono
 app = FastAPI(
     title="Trilha do Eleitor API",
     description="Backend estruturado e relacional para gerenciamento pedagógico de trilhas",
     version="3.0.0",
-    lifespan=lifespan,
+    lifespan=lifespan
 )
+
+
+# =========================================================================
+# 3. CONFIGURAÇÃO POLÍTICA DE SEGURANÇA E CORS (REACT VITE LOCALHOST)
+# =========================================================================
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", FRONTEND_URL],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -265,20 +279,16 @@ def validar_complexidade_senha(password: str):
 def enviar_email_real(nome_usuario: str, email_usuario: str):
     """
     Gerenciador SMTP do Google para envio assíncrono de moderação.
-    Envia um e-mail administrativo com link absoluto do backend configurado por ambiente.
+    Cria uma mensagem MIME estruturada com link absoluto de aprovação local.
     """
-    if not EMAIL_ADM or not EMAIL_PASSWORD:
-        print("Aviso: EMAIL_ADM e/ou EMAIL_PASSWORD não configurados. E-mail administrativo não será enviado.")
-        return
-
     try:
         mensagem = MIMEMultipart()
         mensagem["From"] = EMAIL_ADM
         mensagem["To"] = EMAIL_ADM
-        mensagem["Subject"] = f"Nova solicitação de conteudista: {nome_usuario}"
+        mensagem["Subject"] = f"🔔 Nova Solicitação de Conteudista: {nome_usuario}"
 
-        # Endereço absoluto do backend injetado por variável de ambiente
-        base_url = f"{BACKEND_URL}/admin/aprovar"
+        # Endereço absoluto local injetado com query parameters limpos para clique na mesma máquina
+        base_url = "http://localhost:1234/admin/aprovar"
         link_aprovacao = f"{base_url}?email={email_usuario}"
 
         corpo_html = f"""
@@ -301,6 +311,7 @@ def enviar_email_real(nome_usuario: str, email_usuario: str):
         """
         mensagem.attach(MIMEText(corpo_html, "html"))
 
+        # Conexão estrita com a porta TLS segura do servidor do Gmail do Google
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
         server.login(EMAIL_ADM, EMAIL_PASSWORD)
@@ -320,8 +331,8 @@ def criar_usuario(apelido: str, email: str, password: str, db: Session = Depends
     validar_complexidade_senha(password)
     db_user = db.query(models.User).filter(models.User.email == email).first()
     if db_user:
-        raise HTTPException(status_code=400, detail="Email já cadastrado na plataforma.")
-
+        raise HTTPException(status_code=400, detail="Email já cadastrado na plataforma.") 
+    
     hashed_pwd = password_hash.hash(password)
     new_user = models.User(apelido=apelido, email=email, hashed_password=hashed_pwd, tipo_usuario="leitor")
     db.add(new_user)
@@ -345,10 +356,10 @@ def buscar_perfil(email: str, db: Session = Depends(database.get_db)):
     user = db.query(models.User).filter(models.User.email == email).first()
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
-
+    
     data_obj = getattr(user, 'data_criacao', None)
     data_formatada = data_obj.strftime("%d/%m/%Y") if data_obj else "--/--/----"
-
+    
     return {
         "apelido": user.apelido,
         "email": user.email,
@@ -363,20 +374,20 @@ def atualizar_perfil(email_atual: str, dados: UserUpdate, db: Session = Depends(
     user = db.query(models.User).filter(models.User.email == email_atual).first()
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
-
+    
     if not dados.apelido or not dados.apelido.strip():
         raise HTTPException(status_code=400, detail="O apelido é obrigatório e não pode ser vazio.")
-
+    
     user.apelido = dados.apelido.strip()
     user.telefone = dados.telefone
-
+    
     if dados.nova_senha:
         if not dados.senha_atual or not password_hash.verify(dados.senha_atual, user.hashed_password):
             raise HTTPException(status_code=400, detail="Senha atual informada está incorreta.")
-
+        
         validar_complexidade_senha(dados.nova_senha)
         user.hashed_password = password_hash.hash(dados.nova_senha)
-
+    
     db.commit()
     return {"message": "Perfil updated com sucesso!"}
 
@@ -385,12 +396,12 @@ def upload_foto(email: str, file: UploadFile = File(...), db: Session = Depends(
     user = db.query(models.User).filter(models.User.email == email).first()
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
-
-    file_location = os.path.join(UPLOAD_DIR, f"{email}_{file.filename}")
+    
+    file_location = f"uploads/{email}_{file.filename}"
     with open(file_location, "wb+") as file_object:
         shutil.copyfileobj(file.file, file_object)
-
-    user.foto_perfil = f"/{file_location.replace(os.sep, '/')}"
+    
+    user.foto_perfil = f"/{file_location}"
     db.commit()
     return {"foto_url": user.foto_perfil}
 
@@ -399,7 +410,7 @@ def remover_foto(email: str, db: Session = Depends(database.get_db)):
     user = db.query(models.User).filter(models.User.email == email).first()
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
-
+    
     user.foto_perfil = None
     db.commit()
     return {"message": "Foto removida com sucesso de forma definitiva"}
@@ -423,10 +434,10 @@ def inscrever_trilha(email: str, trilha_id: int, db: Session = Depends(database.
         models.Inscricao.user_email == email,
         models.Inscricao.trilha_id == str(trilha_id)
     ).first()
-
+    
     if existe:
         raise HTTPException(status_code=400, detail="Você já está inscrito nesta trilha.")
-
+    
     nova_inscricao = models.Inscricao(user_email=email, trilha_id=str(trilha_id))
     db.add(nova_inscricao)
     db.commit()
@@ -440,7 +451,7 @@ def concluir_modulo_estudante(trilha_id: int, modulo_id: int, email: str, db: Se
         models.ProgressoModulo.trilha_id == trilha_id,
         models.ProgressoModulo.modulo_id == modulo_id
     ).first()
-
+    
     if not existe:
         novo_progresso = models.ProgressoModulo(user_email=email, trilha_id=trilha_id, modulo_id=modulo_id)
         db.add(novo_progresso)
@@ -515,13 +526,13 @@ def cadastrar_nova_trilha(trilha: TrilhaSchema, db: Session = Depends(database.g
     db.add(nova_trilha)
     db.commit()
     db.refresh(nova_trilha) # CORREÇÃO: Traz as propriedades geradas de forma nativa pelo SQLite
-
+    
     # Faz o parser dos carimbos datetime para strings ISO aceitas pelo Pydantic Schema antes de responder
     if nova_trilha.data_criacao:
         nova_trilha.data_criacao = nova_trilha.data_criacao.isoformat()
     if nova_trilha.data_atualizacao:
         nova_trilha.data_atualizacao = nova_trilha.data_atualizacao.isoformat()
-
+        
     return nova_trilha
 
 @app.patch("/trilhas/{trilha_id}/imagem", summary="Atualiza somente a imagem de capa de uma trilha")
@@ -542,17 +553,18 @@ def deletar_trilha_pedagogica(trilha_id: int, db: Session = Depends(database.get
     db.commit()
     return {"message": "Trilha educativa excluída de forma definitiva!"}
 
-app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 @app.post("/trilhas/upload-imagem", summary="Upload de imagens locais do computador para as lições corrigido")
 def upload_imagem_teoria(file: UploadFile = File(...)):
     try:
         nome_arquivo = f"teoria_{file.filename.replace(' ', '_')}"
-        file_location = os.path.join(UPLOAD_DIR, nome_arquivo)
+        file_location = f"uploads/{nome_arquivo}"
         with open(file_location, "wb+") as file_object:
             shutil.copyfileobj(file.file, file_object)
-
-        return {"url_imagem": f"/{file_location.replace(os.sep, '/')}"}
+            
+        # CORREÇÃO: Inclusão explícita da porta :8000/ mapeada na rede localhost
+        return {"url_imagem": f"http://127.0.0.1:1234/{file_location}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -577,7 +589,7 @@ def salvar_modulo_teoria(trilha_id: int, teoria: TeoriaCreateSchema, db: Session
     db_teoria = None
     if teoria.id:
         db_teoria = db.query(models.ConteudoTeoria).filter(models.ConteudoTeoria.id == teoria.id).first()
-
+    
     if db_teoria:
         db_teoria.titulo = teoria.titulo
         db_teoria.ordem_modulo = teoria.ordem_modulo
@@ -587,21 +599,21 @@ def salvar_modulo_teoria(trilha_id: int, teoria: TeoriaCreateSchema, db: Session
         if not proxima_ordem:
             total_existente = db.query(models.ConteudoTeoria).filter(models.ConteudoTeoria.trilha_id == trilha_id).count()
             proxima_ordem = total_existente
-
+        
         db_teoria = models.ConteudoTeoria(trilha_id=trilha_id, titulo=teoria.titulo, ordem_modulo=proxima_ordem)
         db.add(db_teoria)
-
+    
     db.commit()
     for b in teoria.blocos:
         if b.valor.strip():
             novo_bloco = models.BlocoTeoria(tipo=b.tipo, valor=b.valor.strip(), ordem=b.ordem)
             db_teoria.blocos.append(novo_bloco)
-
+            
     # PASSO 1 REATIVO: Força a atualização do timestamp automático na trilha pai informando a modificação recente
     trilha_pai = db.query(models.Trilha).filter(models.Trilha.id == trilha_id).first()
     if trilha_pai:
         trilha_pai.data_atualizacao = datetime.now()
-
+        
     db.commit()
     db.refresh(db_teoria)
     return {
@@ -665,14 +677,14 @@ def atualizar_pergunta_quiz(pergunta_id: int, dados: QuizSchema, db: Session = D
     questao = db.query(models.PerguntaQuiz).filter(models.PerguntaQuiz.id == pergunta_id).first()
     if not questao:
         raise HTTPException(status_code=404, detail="Questão do Quiz não encontrada.")
-
+    
     questao.enunciado = dados.enunciado.strip()
     questao.alternativa_a = dados.alternativa_a.strip()
     questao.alternativa_b = dados.alternativa_b.strip()
     questao.alternativa_c = dados.alternativa_c.strip()
     questao.alternativa_d = dados.alternativa_d.strip()
     questao.resposta_correta = dados.resposta_correta
-
+    
     db.commit()
     db.refresh(questao)
     return questao
@@ -691,15 +703,15 @@ def solicitar_conteudista(email: str, background_tasks: BackgroundTasks, db: Ses
     user = db.query(models.User).filter(models.User.email == email).first()
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado.")
-
+    
     if getattr(user, 'tipo_usuario', 'leitor') == "conteudista":
         raise HTTPException(status_code=400, detail="Você já é um conteudista oficial.")
     if getattr(user, 'tipo_usuario', 'leitor') == "pendente":
         raise HTTPException(status_code=400, detail="Sua solicitação já está em análise de moderação.")
-
+        
     user.tipo_usuario = "pendente"
     db.commit()
-
+    
     # Enfileira a tarefa em background para evitar travamento na requisição do React
     background_tasks.add_task(enviar_email_real, user.apelido, email)
     return {"message": "Solicitação enviada com sucesso! Aguarde a moderação administrativa."}
@@ -713,10 +725,10 @@ def aprovar_conteudista(email: str, db: Session = Depends(database.get_db)):
     user = db.query(models.User).filter(models.User.email == email).first()
     if not user:
         return "<html><body style='font-family:Arial;text-align:center;padding-top:50px;'><h2 style='color:#ef4444;'>❌ Erro: Usuário não localizado.</h2></body></html>"
-
+    
     user.tipo_usuario = "conteudista"
     db.commit()
-
+    
     return f"""
     <html>
         <body style="font-family: Arial, sans-serif; text-align: center; padding-top: 60px; background-color: #f8fafc; color: #333;">
@@ -757,4 +769,5 @@ async def gerenciador_erros_global(request, exc):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("PORT", "1234")), reload=True)
+    # Executa a aplicação amarrada estritamente ao barramento local IPv4 de loopback
+    uvicorn.run("main:app", host="127.0.0.1", port=1234, reload=True)

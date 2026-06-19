@@ -1,8 +1,0 @@
-fastapi
-uvicorn[standard]
-SQLAlchemy
-pydantic
-python-multipart
-pwdlib
-argon2-cffi
-python-dotenv
