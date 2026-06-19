@@ -794,24 +794,21 @@ def aprovar_conteudista(email: str, db: Session = Depends(database.get_db)):
 # =========================================================================
 
 # GERENCIADOR GLOBAL DE EXCEÇÕES (Garante estabilidade contra inputs corrompidos do React)
+from fastapi.responses import JSONResponse
+from starlette.requests import Request
+
 @app.exception_handler(Exception)
-async def gerenciador_erros_global(request, exc):
-    """
-    Intercepta qualquer erro de execução (runtime error) não tratado no backend.
-    Evita o travamento do servidor Uvicorn e retorna um log limpo para o console.
-    """
+async def gerenciador_erros_global(request: Request, exc: Exception):
     print(f"❌ Erro interno interceptado na requisição {request.url.path}: {str(exc)}")
-    return HTMLResponse(
+    origin = request.headers.get("origin", "")
+    headers = {}
+    if origin in FRONTEND_URLS:
+        headers["Access-Control-Allow-Origin"] = origin
+        headers["Access-Control-Allow-Credentials"] = "true"
+    return JSONResponse(
         status_code=500,
-        content=f"""
-        <html>
-            <body style="font-family: Arial; text-align: center; padding-top: 50px; background-color: #fef2f2;">
-                <h2 style="color: #ef4444;">⚠️ Instabilidade no Servidor Local (500)</h2>
-                <p style="color: #475569;">Verifique as chaves estrangeiras ou reinicie o arquivo usuarios.db.</p>
-                <pre style="background: #cbd5e1; padding: 15px; border-radius: 8px; max-width: 600px; margin: 20px auto; text-align: left; font-size: 12px;">{str(exc)}</pre>
-            </body>
-        </html>
-        """
+        content={"detail": f"Erro interno do servidor: {str(exc)}"},
+        headers=headers,
     )
 
 if __name__ == "__main__":
