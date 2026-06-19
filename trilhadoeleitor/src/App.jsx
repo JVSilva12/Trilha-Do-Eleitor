@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import './App.css';
+import Welcome from './Welcome';
 import Login from './Login';
 import Cadastro from './Cadastro';
 import Trilhas from './Trilhas';
@@ -16,7 +17,7 @@ import musicaFundo from './assets/MorningRoutine.mp3';
 import somClique from './assets/clique.mp3';
 
 function App() {
-  const [tela, setTela] = useState('login');
+  const [tela, setTela] = useState('welcome');
   const [emailLogado, setEmailLogado] = useState('');
   const [trilhaIdEdicao, setTrilhaIdEdicao] = useState(null);
   const [trilhaVisualizacao, setTrilhaVisualizacao] = useState({ id: null, nome: '' });
@@ -85,6 +86,10 @@ function App() {
 
       {/* Elemento de áudio oculto — gerenciado pelo useRef acima */}
       <audio ref={audioRef} src={musicaFundo} preload="auto" style={{ display: 'none' }} />
+
+      {tela === 'welcome' && (
+        <Welcome onEntrar={() => navegarPara('login')} />
+      )}
 
       {tela === 'login' && (
         <Login onLoginSucesso={handleLoginSucesso} onSwitch={() => navegarPara('cadastro')} />
