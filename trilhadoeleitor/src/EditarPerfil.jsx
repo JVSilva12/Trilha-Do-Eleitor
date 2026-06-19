@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { resolverUrlImagem } from './api';
 import { 
  UserIcon, 
  MailIcon, 
@@ -10,6 +11,8 @@ import {
  TrashIcon 
 } from './Icons';
 import './EditarPerfil.css';
+
+const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:1234";
 
 export default function EditarPerfil({ emailUsuario, onVoltar }) {
  const [apelido, setApelido] = useState('');
@@ -32,7 +35,7 @@ export default function EditarPerfil({ emailUsuario, onVoltar }) {
    async function carregarPerfil() {
      if (!emailUsuario) return;
      try {
-      const response = await axios.get(`http://localhost:1234/perfil/${emailUsuario}`);
+      const response = await axios.get(`${API_URL}/perfil/${emailUsuario}`);
        const dados = response.data;
        
        setApelido(dados.apelido || '');
@@ -42,7 +45,7 @@ export default function EditarPerfil({ emailUsuario, onVoltar }) {
        setDataCriacao(dados.data_criacao || '--/--/----');
        
        if (dados.foto_perfil) {
-         setFotoPerfil(`http://localhost:1234${dados.foto_perfil}`);
+         setFotoPerfil(resolverUrlImagem(dados.foto_perfil));
        } else {
          setFotoPerfil(null);
        }
@@ -83,7 +86,7 @@ export default function EditarPerfil({ emailUsuario, onVoltar }) {
        nova_senha: novaSenha || null 
      };
 
-    await axios.put(`http://localhost:1234/perfil/atualizar/${emailUsuario}`, payload);
+    await axios.put(`${API_URL}/perfil/atualizar/${emailUsuario}`, payload);
      alert("Perfil atualizado com sucesso!");
      
      setNomeExibicao(apelido.trim());
@@ -103,10 +106,10 @@ export default function EditarPerfil({ emailUsuario, onVoltar }) {
    formData.append("file", files[0]);
 
    try {
-    const response = await axios.post(`http://localhost:1234/perfil/${emailUsuario}/foto`, formData, {
+    const response = await axios.post(`${API_URL}/perfil/${emailUsuario}/foto`, formData, {
        headers: { 'Content-Type': 'multipart/form-data' }
      });
-    setFotoPerfil(`http://localhost:1234${response.data.foto_url}`);
+    setFotoPerfil(resolverUrlImagem(response.data.foto_url));
    } catch (error) {
      alert("Erro ao enviar foto.");
    }
@@ -115,7 +118,7 @@ export default function EditarPerfil({ emailUsuario, onVoltar }) {
  const handleRemoverFoto = async () => {
     if (!window.confirm("Deseja realmente remover sua foto de perfil?")) return;
     try {
-      await axios.delete(`http://localhost:1234/perfil/${emailUsuario}/foto`);
+      await axios.delete(`${API_URL}/perfil/${emailUsuario}/foto`);
       setFotoPerfil(null);
       alert("Foto removida!");
     } catch (error) {

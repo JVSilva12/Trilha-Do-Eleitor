@@ -3,7 +3,7 @@ import axios from 'axios';
 import { ArrowLeftIcon, BookOpenIcon, PlusIcon, FileTextIcon, TrashIcon, PencilIcon } from './Icons';
 import './PainelConteudista.css';
 
-const API_URL = "http://127.0.0.1:1234";
+const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:1234";
 
 export default function PainelConteudista({ onVoltar, trilhaId }) {
   const [trilhaSelecionada, setTrilhaSelecionada] = useState(trilhaId ? String(trilhaId) : '1');

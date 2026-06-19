@@ -6,6 +6,7 @@ from datetime import datetime
 from contextlib import asynccontextmanager
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from dotenv import load_dotenv
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, BackgroundTasks
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,8 +14,26 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional, List
+import cloudinary
+import cloudinary.uploader
 import models, database
 from pwdlib import PasswordHash
+
+# Carrega variáveis do arquivo .env (apenas em desenvolvimento local;
+# em produção, configure as variáveis direto no painel do provedor de hospedagem)
+load_dotenv()
+
+# Configuração do Cloudinary para armazenar imagens enviadas pelos usuários.
+# Sem isso, as imagens seriam salvas no disco do servidor e perdidas a cada deploy.
+# Crie uma conta gratuita em https://cloudinary.com e preencha as 3 variáveis no .env
+CLOUDINARY_CONFIGURADO = bool(os.environ.get("CLOUDINARY_CLOUD_NAME"))
+if CLOUDINARY_CONFIGURADO:
+    cloudinary.config(
+        cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+        api_key=os.environ.get("CLOUDINARY_API_KEY"),
+        api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
+        secure=True,
+    )
 
 # =========================================================================
 # 1. INICIALIZAÇÃO DE DIRETÓRIOS E CONFIGURAÇÕES DE AMBIENTE LOCAL
@@ -27,9 +46,20 @@ os.makedirs("uploads", exist_ok=True)
 password_hash = PasswordHash.recommended()
 
 # Configurações Oficiais de Credenciais do E-mail Administrativo do Grupo
-EMAIL_ADM = "trilhadoeleitor.adm@gmail.com"
-# Token estrito de 16 letras de segurança gerado pelo painel de senhas de app do Google
-EMAIL_PASSWORD = "qyld xtgg nijt vids" 
+# IMPORTANTE: nunca deixe credenciais fixas no código. Configure essas variáveis
+# de ambiente no seu provedor de hospedagem (e crie um arquivo .env localmente).
+EMAIL_ADM = os.environ.get("EMAIL_ADM", "")
+EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD", "")
+
+# URL pública do backend (usada para montar links de aprovação e de imagens).
+# Em produção, defina BACKEND_URL com a URL real (ex: https://seu-backend.onrender.com)
+BACKEND_URL = os.environ.get("BACKEND_URL", "http://127.0.0.1:1234")
+
+# Lista de origens permitidas no CORS, separadas por vírgula.
+# Em produção, defina FRONTEND_URL com a URL do seu frontend (ex: https://seu-app.vercel.app)
+FRONTEND_URLS = os.environ.get(
+    "FRONTEND_URL", "http://localhost:5173,http://127.0.0.1:5173"
+).split(",")
 
 
 # =========================================================================
@@ -178,7 +208,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=FRONTEND_URLS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -281,14 +311,17 @@ def enviar_email_real(nome_usuario: str, email_usuario: str):
     Gerenciador SMTP do Google para envio assíncrono de moderação.
     Cria uma mensagem MIME estruturada com link absoluto de aprovação local.
     """
+    if not EMAIL_ADM or not EMAIL_PASSWORD:
+        print("⚠️ EMAIL_ADM/EMAIL_PASSWORD não configurados. E-mail de moderação não enviado.")
+        return
     try:
         mensagem = MIMEMultipart()
         mensagem["From"] = EMAIL_ADM
         mensagem["To"] = EMAIL_ADM
         mensagem["Subject"] = f"🔔 Nova Solicitação de Conteudista: {nome_usuario}"
 
-        # Endereço absoluto local injetado com query parameters limpos para clique na mesma máquina
-        base_url = "http://localhost:1234/admin/aprovar"
+        # Endereço absoluto injetado com query parameters limpos para clique no link
+        base_url = f"{BACKEND_URL}/admin/aprovar"
         link_aprovacao = f"{base_url}?email={email_usuario}"
 
         corpo_html = f"""
@@ -320,6 +353,24 @@ def enviar_email_real(nome_usuario: str, email_usuario: str):
         print("E-mail administrativo enviado com sucesso para a caixa corporativa!")
     except Exception as e:
         print(f"Falha ao enviar e-mail por SMTP: {e}")
+
+
+def salvar_arquivo_enviado(file: UploadFile, prefixo: str) -> str:
+    """
+    Salva um arquivo enviado pelo usuário e retorna a URL pública dele.
+    Usa o Cloudinary se as credenciais estiverem configuradas (recomendado para produção,
+    pois persiste as imagens). Caso contrário, cai de volta para salvar no disco local
+    (uploads/), que é suficiente apenas para desenvolvimento.
+    """
+    if CLOUDINARY_CONFIGURADO:
+        resultado = cloudinary.uploader.upload(file.file, folder="trilha-do-eleitor", public_id=f"{prefixo}_{file.filename}")
+        return resultado["secure_url"]
+
+    nome_arquivo = f"{prefixo}_{file.filename.replace(' ', '_')}"
+    file_location = f"uploads/{nome_arquivo}"
+    with open(file_location, "wb+") as file_object:
+        shutil.copyfileobj(file.file, file_object)
+    return f"{BACKEND_URL}/{file_location}"
 
 
 # =========================================================================
@@ -396,12 +447,13 @@ def upload_foto(email: str, file: UploadFile = File(...), db: Session = Depends(
     user = db.query(models.User).filter(models.User.email == email).first()
     if not user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    
-    file_location = f"uploads/{email}_{file.filename}"
-    with open(file_location, "wb+") as file_object:
-        shutil.copyfileobj(file.file, file_object)
-    
-    user.foto_perfil = f"/{file_location}"
+
+    try:
+        url_foto = salvar_arquivo_enviado(file, prefixo=email)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Falha ao salvar a imagem: {e}")
+
+    user.foto_perfil = url_foto
     db.commit()
     return {"foto_url": user.foto_perfil}
 
@@ -558,13 +610,8 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 @app.post("/trilhas/upload-imagem", summary="Upload de imagens locais do computador para as lições corrigido")
 def upload_imagem_teoria(file: UploadFile = File(...)):
     try:
-        nome_arquivo = f"teoria_{file.filename.replace(' ', '_')}"
-        file_location = f"uploads/{nome_arquivo}"
-        with open(file_location, "wb+") as file_object:
-            shutil.copyfileobj(file.file, file_object)
-            
-        # CORREÇÃO: Inclusão explícita da porta :8000/ mapeada na rede localhost
-        return {"url_imagem": f"http://127.0.0.1:1234/{file_location}"}
+        url_imagem = salvar_arquivo_enviado(file, prefixo="teoria")
+        return {"url_imagem": url_imagem}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -769,5 +816,6 @@ async def gerenciador_erros_global(request, exc):
 
 if __name__ == "__main__":
     import uvicorn
-    # Executa a aplicação amarrada estritamente ao barramento local IPv4 de loopback
-    uvicorn.run("main:app", host="127.0.0.1", port=1234, reload=True)
+    # Em produção, a maioria dos provedores injeta a porta via variável de ambiente PORT
+    port = int(os.environ.get("PORT", 1234))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)

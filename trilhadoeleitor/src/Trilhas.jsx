@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { resolverUrlImagem } from './api';
 import logo from './assets/TDElogo.png';
 import fotoUrna from './assets/urna.png'; 
 import fotoProcesso from './assets/processo.png'; 
 import fotoFakeNews from './assets/fakenews.png'; 
 import './Trilhas.css';
 
-const API_URL = "http://127.0.0.1:1234";
+const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:1234";
 
 export default function Trilhas({ emailUsuario, onLogout, onIrParaPerfil, onIrParaPainel, onVisualizarTeoria, onVisualizarQuiz, onVisualizarPratica }) {
   const [fotoPerfil, setFotoPerfil] = useState(null);
@@ -33,7 +34,7 @@ export default function Trilhas({ emailUsuario, onLogout, onIrParaPerfil, onIrPa
       setTipoUsuario(resPerfil.data.tipo_usuario || 'leitor');
       
       if (resPerfil.data.foto_perfil) {
-        setFotoPerfil(`${API_URL}${resPerfil.data.foto_perfil}`);
+        setFotoPerfil(resolverUrlImagem(resPerfil.data.foto_perfil));
       } else {
         setFotoPerfil(null);
       }

@@ -7,7 +7,7 @@ import { excluirTrilha, filtrarTrilhas, listarCategorias, listarTrilhas } from '
 import { ChevronDownIcon, FilterIcon, PlusIcon, SearchIcon } from '../../Icons'; 
 import '../../styles/trilhas.css';
 
-const API_URL = "http://127.0.0.1:1234";
+const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:1234";
 
 export default function GerenciarTrilhas({ emailUsuario, onVoltar, onIrParaNovaTrilha, onEditarTrilha }) {
   const [busca, setBusca] = useState(''); 
