@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import api from './api';
+import axios from 'axios';
 import { ArrowLeftIcon, BookOpenIcon } from './Icons';
 import JogoFakeNews from './JogoFakeNews';
 import AtividadeEleicoes from './AtividadeEleicoes';
 import './VisualizarTeoria.css';
+
+const API_URL = "http://127.0.0.1:1234";
 
 export default function VisualizarPratica({ trilhaId, trilhaNome, onVoltar, audioFundo }) {
   const [modulos, setModulos] = useState([]);
@@ -40,7 +42,7 @@ export default function VisualizarPratica({ trilhaId, trilhaNome, onVoltar, audi
   const handleCarregarModuloEspecifico = useCallback(async (moduloId) => {
     try {
       setCarregando(true);
-      const response = await api.get(`/modulos/${moduloId}`);
+      const response = await axios.get(`${API_URL}/modulos/${moduloId}`);
       setModuloSelecionado(response.data);
 
       // Verifica se o módulo tem um bloco do tipo 'jogo' e carrega as notícias
@@ -74,7 +76,7 @@ export default function VisualizarPratica({ trilhaId, trilhaNome, onVoltar, audi
       try {
         setCarregando(true);
         setErro(false);
-        const resModulos = await api.get(`/trilhas/${trilhaId}/modulos`);
+        const resModulos = await axios.get(`${API_URL}/trilhas/${trilhaId}/modulos`);
         // Filtra apenas módulos do tipo 'pratica'
         const modulosPratica = resModulos.data.filter(mod => mod.tipo_conteudo === 'pratica' || !mod.tipo_conteudo);
         setModulos(modulosPratica);
@@ -98,6 +100,7 @@ export default function VisualizarPratica({ trilhaId, trilhaNome, onVoltar, audi
 
   const handleRetornarAoSumario = () => {
     setModuloSelecionado(null);
+    setNoticiasJogo(null);
     setCarregando(false);
   };
 
@@ -109,19 +112,19 @@ export default function VisualizarPratica({ trilhaId, trilhaNome, onVoltar, audi
           {moduloSelecionado.blocos && moduloSelecionado.blocos.map((bloco, idx) => {
             if (bloco.tipo === 'cargos' || bloco.tipo === 'eleicoes') {
               return (
-                <AtividadeEleicoes
+                <AtividadeEleicoes 
                   key={idx}
                   onVoltar={onVoltar}
                   showHeader={true}
                 />
               );
             }
-
+            
             if (bloco.tipo === 'jogo') {
               return (
                 <div key={idx} style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
                   <header style={{ padding: '16px 6vw', background: 'radial-gradient(circle at top left, #fef3c7 0%, #f8fafc 45%, #ecfeff 100%)', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <button
+                    <button 
                       onClick={onVoltar}
                       style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', padding: '8px' }}
                       title="Voltar para as trilhas"
@@ -134,7 +137,7 @@ export default function VisualizarPratica({ trilhaId, trilhaNome, onVoltar, audi
                     </div>
                   </header>
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 6vw', background: 'radial-gradient(circle at top left, #fef3c7 0%, #f8fafc 45%, #ecfeff 100%)' }}>
-                   <JogoFakeNews
+                   <JogoFakeNews 
                       titulo="Detetive da Informação"
                       descricao="Teste suas habilidades: arraste a notícia e descubra se é verdadeira ou falsa."
                     />
@@ -142,7 +145,7 @@ export default function VisualizarPratica({ trilhaId, trilhaNome, onVoltar, audi
                 </div>
               );
             }
-
+            
             return null;
           })}
         </>
@@ -249,7 +252,7 @@ export default function VisualizarPratica({ trilhaId, trilhaNome, onVoltar, audi
                     if (bloco.tipo === 'jogo') {
                       return (
                         <div key={idx} className="aula-jogo-section" style={{ margin: '20px 0', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
-                          <JogoFakeNews
+                          <JogoFakeNews 
                             titulo="Detetive da Informação"
                             descricao="Teste suas habilidades: arraste a notícia e descubra se é verdadeira ou falsa."
                           />

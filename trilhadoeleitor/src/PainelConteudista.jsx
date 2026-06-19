@@ -1,13 +1,9 @@
 import { useState, useEffect } from 'react';
-import api, { API_URL } from './api';
+import axios from 'axios';
 import { ArrowLeftIcon, BookOpenIcon, PlusIcon, FileTextIcon, TrashIcon, PencilIcon } from './Icons';
 import './PainelConteudista.css';
 
-const resolveAssetUrl = (path) => {
-  if (!path) return null;
-  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) return path;
-  return `${API_URL}${path}`;
-};
+const API_URL = "http://127.0.0.1:1234";
 
 export default function PainelConteudista({ onVoltar, trilhaId }) {
   const [trilhaSelecionada, setTrilhaSelecionada] = useState(trilhaId ? String(trilhaId) : '1');
@@ -15,7 +11,7 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
   const [uploadandoCapa, setUploadandoCapa] = useState(false);
   const [previewCapa, setPreviewCapa] = useState(null);
   const [trilhasDisponiveis, setTrilhasDisponiveis] = useState([]);
-
+  
   // =========================================================================
   // ESTADOS DO PASSO 3: GERENCIAMENTO DE MÚLTIPLOS MÓDULOS POR TRILHA
   // =========================================================================
@@ -26,7 +22,7 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
 
   // Estados do fluxo de Quiz (CRUD Completo Preservado)
   const [perguntasExistentes, setPerguntasExistentes] = useState([]);
-  const [idPerguntaEdicao, setIdPerguntaEdicao] = useState(null);
+  const [idPerguntaEdicao, setIdPerguntaEdicao] = useState(null); 
   const [enunciado, setEnunciado] = useState('');
   const [altA, setAltA] = useState('');
   const [altB, setAltB] = useState('');
@@ -37,7 +33,7 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
   // Carrega reativamente os capítulos/módulos teóricos da trilha selecionada
   const carregarModulosTeoria = async () => {
     try {
-      const response = await api.get(`/trilhas/${trilhaSelecionada}/modulos`);
+      const response = await axios.get(`${API_URL}/trilhas/${trilhaSelecionada}/modulos`);
       setModulosExistentes(response.data);
     } catch (error) {
       console.error("Erro ao carregar sumário de módulos:", error);
@@ -47,7 +43,7 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
   // Carrega reativamente as questões do Quiz cadastradas na trilha selecionada
   const carregarPerguntasQuiz = async () => {
     try {
-      const response = await api.get(`/trilhas/${trilhaSelecionada}/quiz`);
+      const response = await axios.get(`${API_URL}/trilhas/${trilhaSelecionada}/quiz`);
       setPerguntasExistentes(response.data);
     } catch (error) {
       console.error("Erro ao listar questões do simulado:", error);
@@ -56,7 +52,7 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
 
   // Carrega a lista de trilhas disponíveis para o select (dinâmico, não hardcoded)
   useEffect(() => {
-    api.get(`/trilhas`)
+    axios.get(`${API_URL}/trilhas`)
       .then(res => setTrilhasDisponiveis(res.data))
       .catch(err => console.error('Erro ao carregar lista de trilhas:', err));
   }, []);
@@ -75,7 +71,7 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
   // =========================================================================
   // INTERATIVIDADES E MANIPULADORES DO FLUXO DE TEORIA (EDITOR EM BLOCOS)
   // =========================================================================
-
+  
   const handleAdicionarBloco = (tipo) => {
     setBlocos([...blocos, { tipo, valor: '', ordem: blocos.length }]);
   };
@@ -98,12 +94,12 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
     const dadosFormulario = new FormData();
     dadosFormulario.append('file', arquivo);
     try {
-      const response = await api.post(`/trilhas/upload-imagem`, dadosFormulario, {
+      const response = await axios.post(`${API_URL}/trilhas/upload-imagem`, dadosFormulario, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       const urlImagem = response.data.url_imagem;
       // Persiste a nova imagem na trilha via PATCH
-      await api.patch(`/trilhas/${trilhaSelecionada}/imagem`, { imagem: urlImagem });
+      await axios.patch(`${API_URL}/trilhas/${trilhaSelecionada}/imagem`, { imagem: urlImagem });
       setPreviewCapa(urlImagem);
       alert("Imagem de capa atualizada com sucesso!");
     } catch (error) {
@@ -119,13 +115,13 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
     const dadosFormulario = new FormData();
     dadosFormulario.append('file', arquivo);
     try {
-      const response = await api.post(`/trilhas/upload-imagem`, dadosFormulario, {
+      const response = await axios.post(`${API_URL}/trilhas/upload-imagem`, dadosFormulario, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       handleAlterarBlocoValor(index, response.data.url_imagem);
       alert("Upload realizado! Imagem do computador injetada com sucesso.");
-    } catch (error) {
-      alert("Erro técnico ao processar o arquivo físico.");
+    } catch (error) { 
+      alert("Erro técnico ao processar o arquivo físico."); 
     }
   };
 
@@ -138,7 +134,7 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
   const handleExcluirModuloTeoria = async (moduloId) => {
     if (window.confirm("Deseja realmente excluir este módulo teórico? Todos os seus blocos serão apagados.")) {
       try {
-        await api.delete(`/modulos/${moduloId}`);
+        await axios.delete(`${API_URL}/modulos/${moduloId}`);
         alert("Módulo teórico removido com sucesso!");
         carregarModulosTeoria();
         if (idModuloEdicao === moduloId) handleLimparCamposTeoria();
@@ -157,7 +153,7 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
   // =========================================================================
   // INTERATIVIDADES E MANIPULADORES DO FLUXO DE QUIZ (EDITAR / EXCLUIR)
   // =========================================================================
-
+  
   const handleCarregarParaEditarQuiz = (q) => {
     setIdPerguntaEdicao(q.id);
     setEnunciado(q.enunciado);
@@ -171,12 +167,12 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
   const handleExcluirPerguntaQuiz = async (id) => {
     if (window.confirm("Deseja realmente deletar esta questão do simulado?")) {
       try {
-        await api.delete(`/quiz/${id}`);
+        await axios.delete(`${API_URL}/quiz/${id}`);
         alert("Questão removida com sucesso!");
         carregarPerguntasQuiz();
         if (idPerguntaEdicao === id) handleLimparCamposQuiz();
-      } catch (error) {
-        alert("Erro ao excluir questão.");
+      } catch (error) { 
+        alert("Erro ao excluir questão."); 
       }
     }
   };
@@ -189,14 +185,14 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
   // =========================================================================
   // SUBMISSÃO UNIFICADA DOS FORMULÁRIOS PEDAGÓGICOS
   // =========================================================================
-
+  
   const handleSalvarConteudo = async (e) => {
     e.preventDefault();
     try {
       if (tipoConteudo === 'teoria') {
-        if (!titulo.trim()) {
-          alert("Por favor, preencha o título do capítulo.");
-          return;
+        if (!titulo.trim()) { 
+          alert("Por favor, preencha o título do capítulo."); 
+          return; 
         }
 
         const payloadTeoria = {
@@ -205,12 +201,12 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
           titulo: titulo.trim(),
           blocos: blocos.filter(b => b.valor.trim() !== '')
         };
-
-        await api.post(`/trilhas/${trilhaSelecionada}/teoria`, payloadTeoria);
+        
+        await axios.post(`${API_URL}/trilhas/${trilhaSelecionada}/teoria`, payloadTeoria);
         alert(idModuloEdicao ? "Módulo didático atualizado com sucesso!" : "Novo módulo pedagógico anexado à trilha!");
         handleLimparCamposTeoria();
         carregarModulosTeoria();
-      }
+      } 
       else if (tipoConteudo === 'quiz') {
         if (!enunciado.trim() || !altA.trim() || !altB.trim() || !altC.trim() || !altD.trim()) {
           alert("Preencha o enunciado e as 4 alternativas do Quiz.");
@@ -228,18 +224,18 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
         };
 
         if (idPerguntaEdicao) {
-          await api.put(`/quiz/${idPerguntaEdicao}`, payloadQuiz);
+          await axios.put(`${API_URL}/quiz/${idPerguntaEdicao}`, payloadQuiz);
           alert("Questão atualizada com sucesso no banco!");
         } else {
-          await api.post(`/trilhas/${trilhaSelecionada}/quiz`, payloadQuiz);
+          await axios.post(`${API_URL}/trilhas/${trilhaSelecionada}/quiz`, payloadQuiz);
           alert("Nova questão adicionada!");
         }
-
+        
         handleLimparCamposQuiz();
         carregarPerguntasQuiz();
       }
-    } catch (error) {
-      alert("Erro ao sincronizar dados com o banco SQLite.");
+    } catch (error) { 
+      alert("Erro ao sincronizar dados com o banco SQLite."); 
     }
   };
 
@@ -288,7 +284,7 @@ export default function PainelConteudista({ onVoltar, trilhaId }) {
               </label>
               {previewCapa && (
                 <div style={{ marginBottom: '10px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', maxHeight: '140px' }}>
-                  <img src={resolveAssetUrl(previewCapa)} alt="Capa atual" style={{ width: '100%', height: '140px', objectFit: 'cover', display: 'block' }} />
+                  <img src={previewCapa} alt="Capa atual" style={{ width: '100%', height: '140px', objectFit: 'cover', display: 'block' }} />
                 </div>
               )}
               <label style={{

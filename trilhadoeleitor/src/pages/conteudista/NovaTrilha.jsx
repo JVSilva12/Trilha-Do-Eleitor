@@ -1,38 +1,34 @@
-import { useState } from 'react';
-import api, { API_URL } from '../../api';
-import NivelCard from '../../components/Trilhas/NivelCard';
-import { categoriasTrilha, niveisTrilha } from '../../data/trilhasMock';
-import { criarTrilha } from '../../services/trilhasService';
-import { BookmarkIcon, InfoIcon, SaveIcon, SettingsIcon, UploadCloudIcon } from '../../components/Trilhas/TrilhaIcons';
+import { useState } from 'react'; 
+import axios from 'axios';
+import NivelCard from '../../components/Trilhas/NivelCard'; 
+import { categoriasTrilha, niveisTrilha } from '../../data/trilhasMock'; 
+import { criarTrilha } from '../../services/trilhasService'; 
+import { BookmarkIcon, InfoIcon, SaveIcon, SettingsIcon, UploadCloudIcon } from '../../components/Trilhas/TrilhaIcons'; 
 import '../../styles/trilhas.css';
 import './NovaTrilha.css';
 
-const resolveAssetUrl = (path) => {
-  if (!path) return null;
-  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) return path;
-  return `${API_URL}${path}`;
-};
+const API_URL = "http://127.0.0.1:1234";
 
-const niveisDescricao = {
-  'Básico': 'Conteúdo introdutório',
-  'Intermediário': 'Conteúdo aprofundado',
-  'Avançado': 'Conteúdo especializado'
-};
+const niveisDescricao = { 
+  'Básico': 'Conteúdo introdutório', 
+  'Intermediário': 'Conteúdo aprofundado', 
+  'Avançado': 'Conteúdo especializado' 
+}; 
 
-export default function NovaTrilha({ onVoltar }) {
+export default function NovaTrilha({ onVoltar }) { 
   const [salvando, setSalvando] = useState(false);
   const [uploadandoCapa, setUploadandoCapa] = useState(false);
-  const [form, setForm] = useState({
-    nome: '',
-    descricao: '',
-    categoria: '',
-    nivel: '',
-    imagem: '',
+  const [form, setForm] = useState({ 
+    nome: '', 
+    descricao: '', 
+    categoria: '', 
+    nivel: '', 
+    imagem: '', 
     status: 'rascunho'
-  });
+  }); 
 
-  const atualizarCampo = (campo, valor) => {
-    setForm((anterior) => ({ ...anterior, [campo]: valor }));
+  const atualizarCampo = (campo, valor) => { 
+    setForm((anterior) => ({ ...anterior, [campo]: valor })); 
   };
 
   const handleUploadCapaTrilha = async (evento) => {
@@ -42,7 +38,7 @@ export default function NovaTrilha({ onVoltar }) {
     const dadosFormulario = new FormData();
     dadosFormulario.append('file', arquivo);
     try {
-      const response = await api.post(`/trilhas/upload-imagem`, dadosFormulario, {
+      const response = await axios.post(`${API_URL}/trilhas/upload-imagem`, dadosFormulario, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       atualizarCampo('imagem', response.data.url_imagem);
@@ -53,24 +49,24 @@ export default function NovaTrilha({ onVoltar }) {
     }
   };
 
-  const handleSubmit = async (evento) => {
-    evento.preventDefault();
-    setSalvando(true);
-    try {
-      const payload = {
-        ...form,
-        categoria: form.categoria || 'Educação eleitoral',
-        nivel: form.nivel || 'Básico',
-      };
-      await criarTrilha(payload);
+  const handleSubmit = async (evento) => { 
+    evento.preventDefault(); 
+    setSalvando(true); 
+    try { 
+      const payload = { 
+        ...form, 
+        categoria: form.categoria || 'Educação eleitoral', 
+        nivel: form.nivel || 'Básico', 
+      }; 
+      await criarTrilha(payload); 
       alert("Trilha criada com sucesso!");
       onVoltar();
-    } catch (error) {
-      alert(error.response?.data?.detail || 'Não foi possível criar a trilha.');
-    } finally {
-      setSalvando(false);
-    }
-  };
+    } catch (error) { 
+      alert(error.response?.data?.detail || 'Não foi possível criar a trilha.'); 
+    } finally { 
+      setSalvando(false); 
+    } 
+  }; 
 
   return (
     <div className="home-page nt-page">
@@ -198,7 +194,7 @@ export default function NovaTrilha({ onVoltar }) {
               {/* Pré-visualização */}
               <div className="nt-capa-preview">
                 {form.imagem
-                  ? <img src={resolveAssetUrl(form.imagem)} alt="Pré-visualização" />
+                  ? <img src={form.imagem} alt="Pré-visualização" />
                   : <span className="nt-capa-placeholder">Sem imagem</span>
                 }
               </div>
@@ -282,5 +278,5 @@ export default function NovaTrilha({ onVoltar }) {
         </form>
       </main>
     </div>
-  );
+  ); 
 }
