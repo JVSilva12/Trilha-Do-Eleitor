@@ -7,7 +7,7 @@ import { BookmarkIcon, InfoIcon, SaveIcon, SettingsIcon, UploadCloudIcon } from 
 import '../../styles/trilhas.css';
 import './NovaTrilha.css';
 
-const API_URL = "http://127.0.0.1:1234";
+const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:1234";
 
 const niveisDescricao = { 
   'Básico': 'Conteúdo introdutório', 

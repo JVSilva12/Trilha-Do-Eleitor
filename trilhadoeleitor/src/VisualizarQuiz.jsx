@@ -4,7 +4,7 @@ import { ArrowLeftIcon, CheckIcon, TrashIcon } from './Icons';
 import './VisualizarQuiz.css';
 import somAplausos from './assets/aplausos.mp3';
 
-const API_URL = "http://127.0.0.1:1234";
+const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:1234";
 
 export default function VisualizarQuiz({ trilhaId, trilhaNome, onVoltar }) {
   const [perguntas, setPerguntas] = useState([]);

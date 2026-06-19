@@ -3,7 +3,7 @@ import axios from 'axios';
 import { ArrowLeftIcon, BookOpenIcon, FileTextIcon } from './Icons';
 import './VisualizarTeoria.css';
 
-const API_URL = "http://127.0.0.1:1234";
+const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:1234";
 
 // Converte qualquer URL do YouTube ou Vimeo para URL de embed.
 // Para YouTube, adiciona ?enablejsapi=1 para detecção de eventos via postMessage.
