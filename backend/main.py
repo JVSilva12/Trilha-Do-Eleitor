@@ -308,12 +308,14 @@ def validar_complexidade_senha(password: str):
 
 def enviar_email_real(nome_usuario: str, email_usuario: str):
     """
-    Gerenciador SMTP do Google para envio assíncrono de moderação.
-    Cria uma mensagem MIME estruturada com link absoluto de aprovação local.
+    Gerenciador SMTP do Google para envio síncrono de moderação.
+    Cria uma mensagem MIME estruturada com link absoluto de aprovação.
+    Levanta uma exceção em caso de falha, para que a rota que chama essa
+    função possa informar o erro ao usuário em vez de falhar silenciosamente.
     """
     if not EMAIL_ADM or not EMAIL_PASSWORD:
         print("⚠️ EMAIL_ADM/EMAIL_PASSWORD não configurados. E-mail de moderação não enviado.")
-        return
+        raise RuntimeError("Configuração de e-mail ausente no servidor (EMAIL_ADM/EMAIL_PASSWORD).")
     try:
         mensagem = MIMEMultipart()
         mensagem["From"] = EMAIL_ADM
@@ -353,6 +355,7 @@ def enviar_email_real(nome_usuario: str, email_usuario: str):
         print("E-mail administrativo enviado com sucesso para a caixa corporativa!")
     except Exception as e:
         print(f"Falha ao enviar e-mail por SMTP: {e}")
+        raise RuntimeError(f"Falha ao enviar e-mail de notificação: {e}")
 
 
 def salvar_arquivo_enviado(file: UploadFile, prefixo: str) -> str:
@@ -742,10 +745,15 @@ def atualizar_pergunta_quiz(pergunta_id: int, dados: QuizSchema, db: Session = D
 # =========================================================================
 
 @app.post("/perfil/{email}/solicitar-conteudista", summary="Inicia a moderação enviando e-mail para a banca")
-def solicitar_conteudista(email: str, background_tasks: BackgroundTasks, db: Session = Depends(database.get_db)):
+def solicitar_conteudista(email: str, db: Session = Depends(database.get_db)):
     """
     Inicia o fluxo de upgrade de privilégios do eleitor comum para conteudista.
-    Muda o status para 'pendente' e enfileira o envio do e-mail administrativo.
+    Muda o status para 'pendente' e envia o e-mail administrativo.
+
+    O envio é feito de forma síncrona (não em background) porque, no plano
+    gratuito de alguns provedores de hospedagem, o processo pode ser suspenso
+    logo após a resposta HTTP ser enviada, matando tarefas em background antes
+    de concluírem o envio via SMTP.
     """
     user = db.query(models.User).filter(models.User.email == email).first()
     if not user:
@@ -758,9 +766,19 @@ def solicitar_conteudista(email: str, background_tasks: BackgroundTasks, db: Ses
         
     user.tipo_usuario = "pendente"
     db.commit()
-    
-    # Enfileira a tarefa em background para evitar travamento na requisição do React
-    background_tasks.add_task(enviar_email_real, user.apelido, email)
+
+    try:
+        enviar_email_real(user.apelido, email)
+    except RuntimeError as e:
+        # Reverte o status para não deixar o usuário travado em "pendente"
+        # caso o e-mail de notificação não tenha sido enviado.
+        user.tipo_usuario = "leitor"
+        db.commit()
+        raise HTTPException(
+            status_code=502,
+            detail=f"Não foi possível notificar a administração por e-mail. Tente novamente mais tarde. Detalhe técnico: {e}",
+        )
+
     return {"message": "Solicitação enviada com sucesso! Aguarde a moderação administrativa."}
 
 @app.get("/admin/aprovar", response_class=HTMLResponse, summary="Rota capturada pelo clique no e-mail do Gmail")
